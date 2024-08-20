@@ -358,30 +358,39 @@
                                   </button>
                               </div>
                               <form method="post">
-                                  {% csrf_token %}
-                                  <div class="modal-body">
-                                      <div class="form-group">
-                                          <label for="recipient-name" class="col-form-label">Titulo da consulta:</label>
-                                          {{ form.title }}
-                                      </div>
-                                      <div class="form-group">
-                                          <label for="message-text" class="col-form-label">Descrição:</label>
-                                          {{ form.description }}
-                                      </div>
-                                      <div class="form-group">
-                                          <label for="message-text" class="col-form-label">Data e hora de inicio:</label>
-                                          {{ form.start_time }}
-                                      </div>
-                                      <div class="form-group">
-                                          <label for="message-text" class="col-form-label">Data e hora do fim:</label>
-                                          {{ form.end_time }}
-                                      </div>
-                                  </div>
-                                  <div class="modal-footer">
-                                      <button id="modalClose2" type="button" class="btn btn-danger">Fechar</button>
-                                      <button type="submit" class="btn btn-primary">Salvar</button>
-                                  </div>
-                              </form>
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="recipient-name" class="col-form-label">Título da consulta:</label>
+                                        {{ form.title }}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Descrição:</label>
+                                        {{ form.description }}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Data e hora de início:</label>
+                                        {{ form.start_time }}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Data e hora do fim:</label>
+                                        {{ form.end_time }}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="paciente" class="col-form-label">Paciente:</label>
+                                        <select class="form-select" name="paciente" aria-label="Default select example">
+                                            <option value="" selected>Selecione um paciente</option>
+                                            {% for paciente in pacientes %}
+                                                <option value="{{ paciente.id }}">{{ paciente.Nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="modalClose2" type="button" class="btn btn-danger">Fechar</button>
+                                    <button type="submit" class="btn btn-primary">Salvar</button>
+                                </div>
+                            </form>
                           </div>
                       </div>
                   </div>
@@ -412,6 +421,7 @@
                                         <label for="message-text" class="col-form-label">Fim:</label>
                                         <p id = "end_event_detail">
                                     </div>
+                                    
                                 </div>
                                 <div class="modal-footer">
                                     <button id="delete-event-button" data-event-id="" type="button" class="btn btn-danger">Deletar</button>

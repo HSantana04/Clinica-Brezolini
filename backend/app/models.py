@@ -39,7 +39,7 @@ class Paciente(models.Model):
     Cidade = models.CharField(max_length=100, blank=True, null=True)
     Estado = models.CharField(max_length=100, blank=True, null=True)
     def __str__(self):
-        return self.Nome
+        return '{}; id<{}>'.format(self.Nome, self.id)
 class Cadeira(models.Model):
     nome=models.CharField(max_length=100, blank=True, null=True)
 class Agendar(models.Model):
@@ -85,6 +85,7 @@ class Event(EventAbstract):
     description = models.TextField()
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name="events", blank=True, null=True)
 
     objects = EventManager()
 

@@ -199,10 +199,13 @@ def pagina_usuario(request):
 
 @login_required(login_url="/")
 def pagina_paciente(request, paciente_id):
-    context={}
+    
     paciente=get_object_or_404(Paciente, id=paciente_id)
-    context['object']=paciente
+    eventos = Event.objects.filter(paciente=paciente)
+    context={"object":paciente, "eventos":eventos}
     return render(request, 'frontend/pagina_paciente.html', context)
+
+
 
 @has_role_decorator('administrador')
 @login_required(login_url="/")
@@ -220,10 +223,19 @@ def delete_user(request, user_id):
         return redirect('cadastro')
     return render(request, 'frontend/confirmar_excluir.html', context)
 
+def teste(request):
+    pacientes=Paciente.objects.all()
+    return render(request, "frontend/teste.html", {'pacientes':pacientes})
 
 def calendario(request):
     events = Event.objects.all()
-    return render(request, 'frontend/calendario.html', {'events': events})
+    pacientes = Paciente.objects.all()
+    users = User.objects.all()
+    return render(request, 'frontend/calendario.html', {
+        'events': events,
+        'pacientes': pacientes,
+        'users': users,
+    })
 
 class CalendarViewNew(LoginRequiredMixin, generic.View):
     template_name = "frontend/calendario.html"
@@ -233,6 +245,7 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
         forms = self.form_class()
         events = Event.objects.get_all_events(user=request.user)
         events_month = Event.objects.get_running_events(user=request.user)
+        pacientes = Paciente.objects.all()
         event_list = []
         # start: '2020-09-16T16:00:00'
         for event in events:
@@ -242,11 +255,12 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
                     "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "description": event.description,
+                    
                 }
             )
         
         context = {"form": forms, "events": event_list,
-                   "events_month": events_month}
+                   "events_month": events_month, "pacientes": pacientes}
         return render(request, self.template_name, context)
     
 def get_date(req_day):
@@ -289,21 +303,20 @@ class CalendarView(LoginRequiredMixin, generic.ListView):
 
 @login_required(login_url="signup")
 def create_event(request):
-    form = EventForm(request.POST or None)
-    if request.POST and form.is_valid():
-        title = form.cleaned_data["title"]
-        description = form.cleaned_data["description"]
-        start_time = form.cleaned_data["start_time"]
-        end_time = form.cleaned_data["end_time"]
-        Event.objects.get_or_create(
-            user=request.user,
-            title=title,
-            description=description,
-            start_time=start_time,
-            end_time=end_time,
-        )
-        return HttpResponseRedirect(reverse("calendario"))
-    return render(request, "event.html", {"form": form})
+    if request.method == "POST":
+        form = EventForm(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.user = request.user
+            event.save()
+            return redirect('success_url', {'form': form, 'pacientes': pacientes})  # Redirecionar para a página de sucesso
+    else:
+        form = EventForm()
+
+    # Obter todos os pacientes
+    pacientes = Paciente.objects.all()
+
+    return render(request, 'template_name.html', {'form': form, 'pacientes': pacientes})
 
 
 class EventEdit(generic.UpdateView):
@@ -351,6 +364,7 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
         forms = self.form_class()
         events = Event.objects.get_all_events(user=request.user)
         events_month = Event.objects.get_running_events(user=request.user)
+        pacientes=Paciente.objects.all()
         event_list = []
         # start: '2020-09-16T16:00:00'
         for event in events:
@@ -364,7 +378,7 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
             )
         
         context = {"form": forms, "events": event_list,
-                   "events_month": events_month}
+                   "events_month": events_month, "pacientes": pacientes}
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

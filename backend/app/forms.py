@@ -6,7 +6,7 @@ from django import forms
 class EventForm(ModelForm):
     class Meta:
         model = Event
-        fields = ["title", "description", "start_time", "end_time"]
+        fields = ["title", "description", "start_time", "end_time", "paciente"]
         # datetime-local is a HTML5 input type
         widgets = {
             "title": forms.TextInput(
@@ -26,6 +26,9 @@ class EventForm(ModelForm):
                 attrs={"type": "datetime-local", "class": "form-control"},
                 format="%Y-%m-%dT%H:%M",
             ),
+            "paciente": forms.Select(
+                attrs={"class": "form-control"}
+            )
         }
         exclude = ["user"]
 

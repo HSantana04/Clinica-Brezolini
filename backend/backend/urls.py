@@ -57,4 +57,5 @@ urlpatterns = [
         views.RunningEventsListView.as_view(),
         name="running_events",
     ),
+    path("teste", views.teste)
 ]

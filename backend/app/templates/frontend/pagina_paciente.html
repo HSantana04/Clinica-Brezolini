@@ -205,7 +205,7 @@
                   <div>Cidade: {{object.Cidade}}</div>
                   <div>Estado: {{object.Estado}}</div>
 
-
+                
 
               </div>
               <div class="row">
@@ -216,6 +216,18 @@
               <div>Contato: {{object.celular}} </div>
               
           </div>
+          {% if eventos %}
+          {% for evento in eventos %}
+              <li>
+                  <strong>{{ evento.title }}</strong><br>
+                  Início: {{ evento.start_time }}<br>
+                  Fim: {{ evento.end_time }}<br>
+                  Descrição: {{ evento.description }}
+              </li>
+          {% endfor %}
+      {% else %}
+          <li>Sem eventos associados.</li>
+      {% endif %}
           </div>
       </div>
   
