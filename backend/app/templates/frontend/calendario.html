@@ -1,4 +1,4 @@
-<html lang="en">
+<html lang="pt-br">
   {% load static %}
 <head>
     <meta charset="UTF-8">
@@ -38,6 +38,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.5/locales/pt-br.js'></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
           var calendarEl = document.getElementById('calendar');
@@ -46,8 +47,10 @@
               headerToolbar: {
                   left: 'prev,next today',
                   center: 'title',
-                  right: 'dayGridMonth,timeGridWeek,timeGridDay,list'
+                  right: 'dayGridMonth,timeGridWeek,timeGridDay,list',
+                  locale: 'pt-br'
               },
+              locale: 'pt-br',
               initialDate: today,
               navLinks: true,
               selectable: true,
