@@ -36,6 +36,7 @@ urlpatterns = [
     path("pagina_financeiro", views.pagina_financeiro, name='pagina_financeiro'),
     path('users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
     path('paciente/<int:paciente_id>/delete/', views.delete_paciente, name='delete_paciente'),
+    path('paciente/<int:paciente_id>/update/', views.editar_paciente, name='update_paciente'),
     path("calenders/", views.CalendarView.as_view(), name="calendars"),
     path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
     path('next_week/<int:event_id>/', views.next_week, name='next_week'),
@@ -57,5 +58,5 @@ urlpatterns = [
         views.RunningEventsListView.as_view(),
         name="running_events",
     ),
-    path("teste", views.teste)
+    
 ]

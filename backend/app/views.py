@@ -30,13 +30,37 @@ from django.shortcuts import get_object_or_404
 
 from app.models import EventMember, Event
 from app.utils import Calendar
-from app.forms import EventForm, AddMemberForm
+from app.forms import EventForm, AddMemberForm, PacienteForm
 
 
 @login_required(login_url="/")
 def index(request):
-    event = Event.objects.all()
-    return render(request, 'frontend/index.html', {'events': event})
+    # Obtém todos os eventos e pacientes
+    events = Event.objects.all()
+    pacientes = Paciente.objects.all()
+    
+    # Obtém o ano e mês atual
+    ano_atual = datetime.now().year
+    mes_atual = datetime.now().month
+    
+    # Filtra pacientes cadastrados no ano atual
+    pacientes_ano_atual = Paciente.objects.filter(Data_cadastro__year=ano_atual)
+    # Conta o número de pacientes cadastrados no ano atual
+    total_pacientes_ano_atual = pacientes_ano_atual.count()
+    
+    # Filtra pacientes cadastrados no mês atual
+    pacientes_mes_atual = Paciente.objects.filter(Data_cadastro__year=ano_atual, Data_cadastro__month=mes_atual)
+    # Conta o número de pacientes cadastrados no mês atual
+    total_pacientes_mes_atual = pacientes_mes_atual.count()
+    
+    context = {
+        'events': events,
+        'pacientes': pacientes,
+        'total_pacientes_ano_atual': total_pacientes_ano_atual,
+        'total_pacientes_mes_atual': total_pacientes_mes_atual
+    }
+    
+    return render(request, 'frontend/index.html', context)
 
 def login(request):
     if request.user.is_authenticated:
@@ -223,10 +247,7 @@ def delete_user(request, user_id):
         return redirect('cadastro')
     return render(request, 'frontend/confirmar_excluir.html', context)
 
-def teste(request):
-    pacientes=Paciente.objects.all()
-    return render(request, "frontend/teste.html", {'pacientes':pacientes})
-
+@login_required(login_url="/")
 def calendario(request):
     events = Event.objects.all()
     pacientes = Paciente.objects.all()
@@ -237,6 +258,7 @@ def calendario(request):
         'users': users,
     })
 
+@login_required(login_url="/")
 class CalendarViewNew(LoginRequiredMixin, generic.View):
     template_name = "frontend/calendario.html"
     form_class = EventForm
@@ -262,7 +284,8 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
         context = {"form": forms, "events": event_list,
                    "events_month": events_month, "pacientes": pacientes}
         return render(request, self.template_name, context)
-    
+
+@login_required(login_url="/")
 def get_date(req_day):
     if req_day:
         year, month = (int(x) for x in req_day.split("-"))
@@ -270,13 +293,14 @@ def get_date(req_day):
     return datetime.today()
 
 
+@login_required(login_url="/")
 def prev_month(d):
     first = d.replace(day=1)
     prev_month = first - timedelta(days=1)
     month = "month=" + str(prev_month.year) + "-" + str(prev_month.month)
     return month
 
-
+@login_required(login_url="/")
 def next_month(d):
     days_in_month = calendar.monthrange(d.year, d.month)[1]
     last = d.replace(day=days_in_month)
@@ -444,3 +468,16 @@ class RunningEventsListView(ListView):
 
     def get_queryset(self):
         return Event.objects.get_running_events(user=self.request.user)
+
+def editar_paciente(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+
+    if request.method == 'POST':
+        form = PacienteForm(request.POST, instance=paciente)
+        if form.is_valid():
+            form.save()
+            return redirect('pacientes')  # Redireciona após a atualização
+    else:
+        form = PacienteForm(instance=paciente)
+
+    return render(request, 'frontend/editar_paciente.html', {'form': form})

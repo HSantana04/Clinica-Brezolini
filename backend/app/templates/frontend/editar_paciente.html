@@ -27,6 +27,17 @@
 
   <!-- Template Main CSS File -->
   <link href="{% static "css/style.css" %}" rel="stylesheet">
+  <script>
+    function validateForm() {
+      var password = document.getElementById('inputPassword').value;
+      var confirmPassword = document.getElementById('inputConfirmPassword').value;
+      if (password !== confirmPassword) {
+        alert('As senhas não coincidem.');
+        return false;
+      }
+      return true;
+    }
+  </script>
 
   <!-- =======================================================
   * Template Name: NiceAdmin
@@ -43,7 +54,7 @@
   <header id="header" class="header fixed-top d-flex align-items-center" style="background-color:rgb(76, 87, 90);">
 
     <div class="d-flex align-items-center justify-content-between" >
-      <a href="index" class="d-flex align-items-center">
+      <a href="{%index%}" class="d-flex align-items-center">
         <img src="{% static "img/brezoliniodontologia.PNG" %}" height="50px">
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
@@ -65,13 +76,7 @@
           </a>
         </li><!-- End Search Icon-->
 
-        <li class="nav-item dropdown">
-
-         
-
-          
-
-        </li><!-- End Messages Nav -->
+        
 
         <li class="nav-item dropdown pe-3">
 
@@ -97,7 +102,7 @@
             <li>
               <a class="dropdown-item d-flex align-items-center" href="pagina_usuario">
                 <i class="bi bi-person"></i>
-                <span>My Profile</span>
+                <span>Minha conta</span>
               </a>
             </li>
             <li>
@@ -110,13 +115,13 @@
             </li>
 
             <li>
-              <form action="{% url 'logout' %}" method="POST" class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}">{%csrf_token%}
-                <button class="dropdown-item d-flex align-items-center" type="submit">
-                  <i class="bi bi-box-arrow-right"></i>
-                  <span>Fazer logout</span>
-                </button>
-              </form>
-          </li>
+                <form action="{% url 'logout' %}" method="POST" class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}">{%csrf_token%}
+                  <button class="dropdown-item d-flex align-items-center" type="submit">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Fazer logout</span>
+                  </button>
+                </form>
+            </li>
 
           </ul><!-- End Profile Dropdown Items -->
         </li><!-- End Profile Nav -->
@@ -131,24 +136,24 @@
 
     <ul class="sidebar-nav" id="sidebar-nav">
 
-      <li class="nav-item ">
-        <a class="nav-link collapsed" href="index">
-          <i class="bi bi-grid"></i>
-          <span>Dashboard</span>
-        </a>
-      </li><!-- End Dashboard Nav -->
-      <li class="nav-item">
-        <a class="nav-link " href="pacientes">
-          <i class="bi bi-person"></i>
-          <span>Pacientes</span>
-        </a>
-      </li><!-- End Dashboard Nav -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="calendario">
-          <i class="bi bi-calendar"></i>
-          <span>Calendario</span>
-        </a>
-      </li><!-- End Dashboard Nav -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'index'%}">
+              <i class="bi bi-grid"></i>
+              <span>Dashboard</span>
+            </a>
+          </li><!-- End Dashboard Nav -->
+          <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'paciente'%}">
+              <i class="bi bi-person"></i>
+              <span>Pacientes</span>
+            </a>
+          </li><!-- End Dashboard Nav -->
+          <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'calendario' %}">
+              <i class="bi bi-calendar"></i>
+              <span>Calendario</span>
+            </a>
+          </li><!-- End Dashboard Nav -->
 
       
 
@@ -156,83 +161,31 @@
 
   </aside><!-- End Sidebar-->
 
-  <main id="main" class="main">
+  <main id="main" class="main" backgor>
 
     <div class="pagetitle">
-      <h1>Pacientes</h1>
+      <h1>Dashboard</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index">Home</a></li>
-          <li class="breadcrumb-item active">Pacientes</li>
+          <li class="breadcrumb-item"><a href="{% url 'index'%}">Home</a></li>
+          <li class="breadcrumb-item active">Dashboard</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
 
-    <section class="section">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="card">
-                <div class="card-body">
-                <h5 class="card-title">Cadastrar</h5>
-                <a href="cadastrar_paciente"> <button type="button" class="btn btn-primary w-25">Cadastrar Paciente</button></a>
-                <button type="button" class="btn btn-secondary w-25">Localizar Paciente</button>
-            </div>
-            </div>
-            <div class="card">
-              <div class="card-body">
-                
-                <!-- Table with stripped rows -->
-                <table class="table datatable">
-                    <h1> </h1>
-                    
-                   
-                  <thead>
-                    <tr>
-                      <th>N. registro.</th>
-                      <th>
-                        <b>N</b>ome
-                      </th>
-                      <th>Email</th>
-                      <th data-type="date" data-format="YYYY/DD/MM">Data de inicio</th>
-                      <th>Celular</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for paciente in pacientes %}
-                    <tr>
-                        <th scope="row">{{ paciente.id }}</th>
-                        <td><a href="{% url 'pagina_paciente' paciente_id=paciente.id %}">{{ paciente.Nome }}</a></td>
-                        <td>
-                          {{ paciente.Email }}
-                        </td>
-                        <td>
-                          {{ paciente.Data_cadastro }}
-                        </td>
-                        <td>{{ paciente.celular }}</td>
-                        
-                        <td>
-                            <a href="{% url 'delete_paciente' paciente_id=paciente.id %}" class="btn btn-danger btn-sm">
-                                <i class="bi bi-trash-fill"></i>
-                            </a>
-                            <a href="{% url 'update_paciente' paciente_id=paciente.id %}" class="btn btn-warning btn-sm">
-                              <i class="bi bi-pencil-fill"></i>
-                          </a>
-                           
-                        </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-                <!-- End Table with stripped rows -->
-  
-              </div>
-            </div>
-  
-          </div>
+    <section class="section dashboard">
+        
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary mt-3 btn-block">Salvar</button>
+                <a href="{% url 'pacientes' %}" class="btn btn-secondary mt-3 btn-block">Voltar para a lista de pacientes</a>
+            </form>
         </div>
-      </section>
-  
+    </div><!-- End Card with titles, buttons, and links -->
+    </section>
 
   </main><!-- End #main -->
 

@@ -1,5 +1,5 @@
 from django.forms import ModelForm, DateInput
-from app.models import EventMember, Event
+from app.models import EventMember, Event, Paciente
 from django import forms
 
 
@@ -43,3 +43,13 @@ class AddMemberForm(forms.ModelForm):
     class Meta:
         model = EventMember
         fields = ["user"]
+
+class PacienteForm(forms.ModelForm):
+    class Meta:
+        model = Paciente
+        fields = '__all__'  # Inclui todos os campos do modelo
+        widgets = {
+            'Data_cadastro': forms.DateInput(attrs={'type': 'date'}),
+            'Data_Nascimento': forms.DateInput(attrs={'type': 'date'}),
+            'Data_adesao': forms.DateInput(attrs={'type': 'date'}),
+        }
