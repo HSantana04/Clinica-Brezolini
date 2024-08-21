@@ -27,22 +27,30 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-
+from django.utils import timezone
 from app.models import EventMember, Event
 from app.utils import Calendar
 from app.forms import EventForm, AddMemberForm, PacienteForm
+from django.db.models import Count
+from django.db.models.functions import TruncDay
 
 
 @login_required(login_url="/")
 def index(request):
-    # Obtém todos os eventos e pacientes
-    events = Event.objects.all()
+    # Obtém a data e hora atual
+    agora = timezone.now()
+
+    # Filtra eventos que começam após a data e hora atual e ordena por data de início
+    eventos_futuros = Event.objects.filter(start_time__gt=agora).order_by('start_time')
+
+    # Obtém todos os pacientes
     pacientes = Paciente.objects.all()
-    
+    inicio_do_dia = agora.replace(hour=0, minute=0, second=0, microsecond=0)
+    fim_do_dia = agora.replace(hour=23, minute=59, second=59, microsecond=999999)
     # Obtém o ano e mês atual
-    ano_atual = datetime.now().year
-    mes_atual = datetime.now().month
-    
+    ano_atual = agora.year
+    mes_atual = agora.month
+    eventos_hoje = Event.objects.filter(start_time__range=(inicio_do_dia, fim_do_dia)).order_by('start_time')
     # Filtra pacientes cadastrados no ano atual
     pacientes_ano_atual = Paciente.objects.filter(Data_cadastro__year=ano_atual)
     # Conta o número de pacientes cadastrados no ano atual
@@ -53,11 +61,38 @@ def index(request):
     # Conta o número de pacientes cadastrados no mês atual
     total_pacientes_mes_atual = pacientes_mes_atual.count()
     
+    # Obtém o início e o fim do dia atual
+    inicio_do_dia = agora.replace(hour=0, minute=0, second=0, microsecond=0)
+    fim_do_dia = agora.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    # Filtra consultas agendadas para o dia atual
+    consultas_dia_atual = Event.objects.filter(start_time__range=(inicio_do_dia, fim_do_dia))
+    # Conta o número de consultas agendadas para o dia atual
+    total_consultas_dia_atual = consultas_dia_atual.count()
+    ultimos_eventos = Event.objects.filter(start_time__lt=agora).order_by('-start_time')[:10]
+
+    start_of_month = agora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    end_of_month = (start_of_month + timezone.timedelta(days=31)).replace(day=1) - timezone.timedelta(seconds=1)
+    consultas_por_dia = Event.objects.filter(start_time__range=(start_of_month, end_of_month)) \
+                                       .annotate(data=TruncDay('start_time')) \
+                                       .values('data') \
+                                       .annotate(total=Count('id')) \
+                                       .order_by('data')
+
+    # Formata os dados para o gráfico
+    dias = [item['data'].strftime('%Y-%m-%d') for item in consultas_por_dia]
+    total_consultas = [item['total'] for item in consultas_por_dia]
+    
     context = {
-        'events': events,
+        'eventos_futuros': eventos_futuros,
         'pacientes': pacientes,
         'total_pacientes_ano_atual': total_pacientes_ano_atual,
-        'total_pacientes_mes_atual': total_pacientes_mes_atual
+        'total_pacientes_mes_atual': total_pacientes_mes_atual,
+        'total_consultas_dia_atual': total_consultas_dia_atual,
+        'eventos_hoje': eventos_hoje,
+        'ultimos_eventos':ultimos_eventos,
+        'dias': dias,
+        'total_consultas': total_consultas,
     }
     
     return render(request, 'frontend/index.html', context)
@@ -386,8 +421,8 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
         forms = self.form_class()
-        events = Event.objects.get_all_events(user=request.user)
-        events_month = Event.objects.get_running_events(user=request.user)
+        events = Event.objects.all()
+        events_month = Event.objects.all()
         pacientes=Paciente.objects.all()
         event_list = []
         # start: '2020-09-16T16:00:00'

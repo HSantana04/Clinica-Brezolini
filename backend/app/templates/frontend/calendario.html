@@ -249,23 +249,23 @@
                 <span class="d-none d-md-block dropdown-toggle ps-2" style="color: white;">{{ user.username }}</span>
               </a><!-- End Profile Iamge Icon -->
     
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" style="height: 500%;">
                 <li class="dropdown-header">
                   <h6>{{ user.username }}</h6>
                   <span>              {% if user.groups.all %}
-                {% for group in user.groups.all %}
-                    {{ group.name }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            {% else %}
-                Nenhum grupo
-            {% endif %}</span>
+                    {% for group in user.groups.all %}
+                        {{ group.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    Nenhum grupo
+                {% endif %}</span>
                 </li>
                 <li>
                   <hr class="dropdown-divider">
                 </li>
     
                 <li>
-                  <a class="dropdown-item d-flex align-items-center" href="pagina_usuario">
+                  <a class="dropdown-item d-flex align-items-center" href="{% url 'pagina_usuario' %}">
                     <i class="bi bi-person"></i>
                     <span>Minha conta</span>
                   </a>

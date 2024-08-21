@@ -224,7 +224,7 @@
                       <i class="bi bi-currency-dollar"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>1000 R$</h6>
+                      <h6>{{total_consultas_dia_atual}}</h6>
                       
                     </div>
                   </div>
@@ -270,45 +270,28 @@
             <!-- Reports -->
             <div class="col-12">
               <div class="card">
-
                 <div class="filter">
                   <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <li class="dropdown-header text-start">
                       <h6>Filter</h6>
                     </li>
-
                   </ul>
                 </div>
-
                 <div class="card-body">
-                  <h5 class="card-title">Pacientes Totais <span>/Anual</span></h5>                  
-                          <!-- Bordered Tabs -->
-              <ul class="nav nav-tabs nav-tabs-bordered" id="borderedTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#bordered-home" type="button" role="tab" aria-controls="home" aria-selected="true">Totais</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Distribuição por genero</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#bordered-contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Distribuição por idade</button>
-                </li>
-              </ul>
-              
-
-            
-          
-
+                  <h5 class="card-title">Consultas por Dia <span>/Mês</span></h5>                  
                   <!-- Line Chart -->
                   <div id="reportsChart"></div>
-
+                  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
                   <script>
                     document.addEventListener("DOMContentLoaded", () => {
+                      const dias = {{ dias|safe }};
+                      const totalConsultas = {{ total_consultas|safe }};
+            
                       new ApexCharts(document.querySelector("#reportsChart"), {
                         series: [{
                           name: 'Consultas/Dia',
-                          data: [31, 40, 28, 51, 42, 82, 56],
+                          data: totalConsultas,
                         }],
                         chart: {
                           height: 350,
@@ -338,22 +321,23 @@
                           width: 2
                         },
                         xaxis: {
+                          categories: dias,
                           type: 'datetime',
-                          categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
+                          labels: {
+                            format: 'dd/MM'
+                          }
                         },
                         tooltip: {
                           x: {
-                            format: 'dd/MM/yy HH:mm'
+                            format: 'dd/MM'
                           },
                         }
                       }).render();
                     });
                   </script>
                   <!-- End Line Chart -->
-
                 </div>
-
-              </div>
+            </div>
             </div><!-- End Reports -->
 
             <!-- Recent Consultas -->
@@ -371,7 +355,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for event in events %}
+                    {% for event in ultimos_eventos %}
                     <tr>
                       <th scope="row">{{ event.title }}</th>
                       <td>{{ event.start_time }}</td>
@@ -397,7 +381,7 @@
           </div>
           <div style="margin-top: -4%;" class="card">
             <div class="card-body">
-              <h5 class="card-title">Proximas consultas</h5>
+              <h5 class="card-title">Consultas de hoje</h5>
 
               <!-- Default Table -->
               <table class="table">
@@ -411,7 +395,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for event in events %}
+                  {% for event in eventos_hoje %}
                     <tr>
                       <th scope="row">{{ event.id }}</th>
                       <td>{{ event.title }}</td>
