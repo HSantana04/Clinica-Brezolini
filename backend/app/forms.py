@@ -1,5 +1,5 @@
 from django.forms import ModelForm, DateInput
-from app.models import EventMember, Event, Paciente
+from app.models import EventMember, Event, Paciente, Anotacao
 from django import forms
 
 
@@ -52,4 +52,12 @@ class PacienteForm(forms.ModelForm):
             'Data_cadastro': forms.DateInput(attrs={'type': 'date'}),
             'Data_Nascimento': forms.DateInput(attrs={'type': 'date'}),
             'Data_adesao': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class AnotacaoForm(forms.ModelForm):
+    class Meta:
+        model = Anotacao
+        fields = ['texto']
+        widgets = {
+            'texto': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Digite sua anotação aqui...'}),
         }

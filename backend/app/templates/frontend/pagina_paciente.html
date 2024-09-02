@@ -45,6 +45,25 @@
         }
     }
 </style>
+<style>
+  #colorButton {
+      width: 150px; /* Ajuste conforme necessário */
+      height: 150px; /* Ajuste conforme necessário */
+      border: none;
+      background-image: url('imagem.jpg'); /* Substitua pelo caminho da sua imagem */
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      background-blend-mode: multiply; /* Ajuste o modo de mistura conforme necessário */
+  }
+
+  /* Cores usadas para a sobreposição */
+  .color1 { background-color: red; }
+  .color2 { background-color: green; }
+  .color3 { background-color: blue; }
+  .color4 { background-color: orange; }
+</style>
 
   <!-- =======================================================
   * Template Name: NiceAdmin
@@ -229,7 +248,24 @@
       {% else %}
           <li>Sem eventos associados.</li>
       {% endif %}
-          </div>
+          </div><hr>
+          <h3 style="text-align: center;">Adicionar Anotações</h3>
+    <form method="post" style="margin-left: 1%;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button style="margin-left: 1%" class="btn btn-primary" type="submit">Salvar Anotação</button>
+    </form><hr>
+          <h3 style="text-align: center;">Anotações do paciente</h3>
+    <ul>
+        {% for anotacao in anotacoes %}
+        <li>{{ anotacao.texto }} - {{ anotacao.data_criacao }}</li>
+        {% empty %}
+        <li>Nenhuma anotação registrada.</li>
+        {% endfor %}
+    </ul><hr>
+    <ul>
+      <li>{{odontograma.dente1}}</li>
+  </ul><hr>
       </div>
   
   <div class="card">
@@ -242,9 +278,8 @@
         </div>
       
         <ul class="list-group list-group-flush">
-          
+
             <li class="list-group-item"></li>
-          
         </ul>
       
     </div>
@@ -254,7 +289,26 @@
 
   <!-- ======= Footer ======= -->
   
+  <script>
+    // JavaScript para alterar a cor de sobreposição
+    const button = document.getElementById('colorButton');
 
+    let colorIndex = 0;
+    const colors = ['color1', 'color2', 'color3', 'color4'];
+
+    button.classList.add(colors[colorIndex]);
+
+    button.addEventListener('click', () => {
+        // Remove a classe de cor atual
+        button.classList.remove(colors[colorIndex]);
+
+        // Atualiza o índice da cor
+        colorIndex = (colorIndex + 1) % colors.length;
+
+        // Adiciona a nova classe de cor
+        button.classList.add(colors[colorIndex]);
+    });
+</script>
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->

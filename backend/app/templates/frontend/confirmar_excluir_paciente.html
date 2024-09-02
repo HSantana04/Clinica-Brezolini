@@ -178,10 +178,10 @@
     <div class="card">
         <div class="card-body">
             <form method="post"> {% csrf_token %}
-            <h5 class="card-title">Deletando o usuário: {{ object.username }}</h5>
+            <h5 class="card-title">Deletando o usuário: {{ object.Nome }}</h5>
             <p class="card-text">Tem certeza que quer deletar esse usuario?</p>
             <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
-            <p class="card-text"><a href="{% url 'cadastro' %}" class="btn btn-secondary">Cancelar</a></p>
+            <p class="card-text"><a href="{% url 'pacientes' %}" class="btn btn-secondary">Cancelar</a></p>
             </form>
         </div>
     </div><!-- End Card with titles, buttons, and links -->

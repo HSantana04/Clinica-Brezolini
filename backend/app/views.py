@@ -28,9 +28,9 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from app.models import EventMember, Event
+from app.models import EventMember, Event, Anotacao, Odontograma
 from app.utils import Calendar
-from app.forms import EventForm, AddMemberForm, PacienteForm
+from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm
 from django.db.models import Count
 from django.db.models.functions import TruncDay
 
@@ -261,7 +261,18 @@ def pagina_paciente(request, paciente_id):
     
     paciente=get_object_or_404(Paciente, id=paciente_id)
     eventos = Event.objects.filter(paciente=paciente)
-    context={"object":paciente, "eventos":eventos}
+    anotacoes = Anotacao.objects.filter(paciente=paciente)
+    odontograma = Odontograma.objects.filter(paciente=paciente)
+    if request.method == 'POST':
+        form = AnotacaoForm(request.POST)
+        if form.is_valid():
+            anotacao = form.save(commit=False)
+            anotacao.paciente = paciente
+            anotacao.save()
+            return redirect('pagina_paciente', paciente_id=paciente.id)
+    else:
+        form = AnotacaoForm()
+    context={"object":paciente, "eventos":eventos, "anotacoes": anotacoes, "form": form, "odontograma": odontograma}
     return render(request, 'frontend/pagina_paciente.html', context)
 
 
