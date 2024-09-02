@@ -30,7 +30,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from app.models import EventMember, Event, Anotacao, Odontograma
 from app.utils import Calendar
-from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm
+from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm
 from django.db.models import Count
 from django.db.models.functions import TruncDay
 
@@ -262,7 +262,7 @@ def pagina_paciente(request, paciente_id):
     paciente=get_object_or_404(Paciente, id=paciente_id)
     eventos = Event.objects.filter(paciente=paciente)
     anotacoes = Anotacao.objects.filter(paciente=paciente)
-    odontograma = Odontograma.objects.filter(paciente=paciente)
+    odontograma = Odontograma.objects.get_or_create(paciente=paciente)
     if request.method == 'POST':
         form = AnotacaoForm(request.POST)
         if form.is_valid():
@@ -270,9 +270,15 @@ def pagina_paciente(request, paciente_id):
             anotacao.paciente = paciente
             anotacao.save()
             return redirect('pagina_paciente', paciente_id=paciente.id)
+        dente = DenteForm(request.POST)
+        
+        if dente.is_valid():
+            dente.save()
+            return redirect('pagina_paciente', paciente_id=paciente.id)  # Redireciona após a atualização
     else:
         form = AnotacaoForm()
-    context={"object":paciente, "eventos":eventos, "anotacoes": anotacoes, "form": form, "odontograma": odontograma}
+        dente = DenteForm()
+    context={"object":paciente, "eventos":eventos, "anotacoes": anotacoes, "form": form, "odontograma": odontograma, "dente": dente}
     return render(request, 'frontend/pagina_paciente.html', context)
 
 

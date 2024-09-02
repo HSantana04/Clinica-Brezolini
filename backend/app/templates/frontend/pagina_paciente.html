@@ -263,9 +263,23 @@
         <li>Nenhuma anotação registrada.</li>
         {% endfor %}
     </ul><hr>
-    <ul>
-      <li>{{odontograma.dente1}}</li>
-  </ul><hr>
+        <!-- Exiba os detalhes do odontograma -->
+        <table>
+          <form method="post" style="margin-left: 1%;">
+            {% csrf_token %}
+            {% for field in dente %}
+            {% if field.name != 'paciente' %}  <!-- Substitua 'dente1' pelo nome do campo que você deseja ocultar -->
+                <div>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endif %}
+        {% endfor %}
+            <button style="margin-left: 1%" class="btn btn-primary" type="submit">Salvar Anotação</button>
+        </form><hr>
+            <!-- Adicione mais campos conforme necessário -->
+        </table>
+    <hr>
       </div>
   
   <div class="card">

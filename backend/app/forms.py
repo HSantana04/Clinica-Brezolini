@@ -1,5 +1,5 @@
 from django.forms import ModelForm, DateInput
-from app.models import EventMember, Event, Paciente, Anotacao
+from app.models import EventMember, Event, Paciente, Anotacao, Odontograma
 from django import forms
 
 
@@ -61,3 +61,51 @@ class AnotacaoForm(forms.ModelForm):
         widgets = {
             'texto': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Digite sua anotação aqui...'}),
         }
+
+class DenteForm(forms.ModelForm):
+    OPCOES = [
+        ('opcao1', 'Opção 1'),
+        ('opcao2', 'Opção 2'),
+        ('opcao3', 'Opção 3'),
+        ('opcao4', 'Opção 4'),
+        ('opcao5', 'Opção 5'),
+    ]
+
+    dente1 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente2 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente3 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente4 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente5 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente6 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente7 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente8 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente9 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente10 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente11 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente12 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente13 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente14 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente15 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente16 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente17 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente18 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente19 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente20 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente21 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente22 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente23 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente24 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente25 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente26 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente27 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente28 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente29 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente30 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente31 = forms.ChoiceField(choices=OPCOES, required=False)
+    dente32 = forms.ChoiceField(choices=OPCOES, required=False)
+
+    class Meta:
+        model = Odontograma
+        fields = '__all__'  # Inclui todos os campos do modelo  # Inclui todos os campos do modelo
+        
+

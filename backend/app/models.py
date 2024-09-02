@@ -136,7 +136,7 @@ class Anotacao(models.Model):
     
 class Odontograma(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='odontograma')
-    dente1=models.TextField(blank=True)
+    dente1=models.TextField(blank=True, null=True)
     dente2=models.TextField(blank=True, null=True)
     dente3=models.TextField(blank=True, null=True)
     dente4=models.TextField(blank=True, null=True)
