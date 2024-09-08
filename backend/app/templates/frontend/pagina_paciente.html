@@ -266,15 +266,18 @@
         <!-- Exiba os detalhes do odontograma -->
         <table>
           <form method="post" style="margin-left: 1%;">
+            <img src="{% static "img/odontograma.PNG" %}">
             {% csrf_token %}
             {% for field in dente %}
-            {% if field.name != 'paciente' %}  <!-- Substitua 'dente1' pelo nome do campo que você deseja ocultar -->
+            
                 <div>
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
+                    {% if field.errors %}
+                        <div class="error">{{ field.errors }}</div>
+                    {% endif %}
                 </div>
-            {% endif %}
-        {% endfor %}
+            {% endfor %}
             <button style="margin-left: 1%" class="btn btn-primary" type="submit">Salvar Anotação</button>
         </form><hr>
             <!-- Adicione mais campos conforme necessário -->

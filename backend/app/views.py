@@ -258,30 +258,38 @@ def pagina_usuario(request):
 
 @login_required(login_url="/")
 def pagina_paciente(request, paciente_id):
-    
-    paciente=get_object_or_404(Paciente, id=paciente_id)
+    paciente = get_object_or_404(Paciente, id=paciente_id)
     eventos = Event.objects.filter(paciente=paciente)
     anotacoes = Anotacao.objects.filter(paciente=paciente)
-    odontograma = Odontograma.objects.get_or_create(paciente=paciente)
+    odontograma, created = Odontograma.objects.get_or_create(paciente=paciente)
+
     if request.method == 'POST':
         form = AnotacaoForm(request.POST)
+        dente_form = DenteForm(request.POST, instance=odontograma)
+
         if form.is_valid():
             anotacao = form.save(commit=False)
             anotacao.paciente = paciente
             anotacao.save()
-            return redirect('pagina_paciente', paciente_id=paciente.id)
-        dente = DenteForm(request.POST)
-        
-        if dente.is_valid():
-            dente.save()
-            return redirect('pagina_paciente', paciente_id=paciente.id)  # Redireciona após a atualização
+
+        if dente_form.is_valid():
+            dente_form.save()
+
+        return redirect('pagina_paciente', paciente_id=paciente.id)
     else:
         form = AnotacaoForm()
-        dente = DenteForm()
-    context={"object":paciente, "eventos":eventos, "anotacoes": anotacoes, "form": form, "odontograma": odontograma, "dente": dente}
+        dente_form = DenteForm(instance=odontograma)
+
+    context = {
+        "object": paciente,
+        "eventos": eventos,
+        "anotacoes": anotacoes,
+        "form": form,
+        "odontograma": odontograma,
+        "dente": dente_form
+    }
+
     return render(request, 'frontend/pagina_paciente.html', context)
-
-
 
 @has_role_decorator('administrador')
 @login_required(login_url="/")
