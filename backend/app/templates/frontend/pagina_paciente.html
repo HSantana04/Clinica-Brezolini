@@ -27,7 +27,35 @@
 
   <!-- Template Main CSS File -->
   <link href="{% static "css/style.css" %}" rel="stylesheet">
+  
   <style>
+    .container {
+      width: 660px;
+      height: 387px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 138px 93px; /* Margem vertical e horizontal ao redor da grade */
+      box-sizing: border-box; /* Inclui padding no tamanho total do contêiner */
+  }
+
+  .grid {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 2px; /* Espaço entre os blocos */
+      width: 100%;
+      height: 100%;
+  }
+
+  .block {
+      background-color: #cccccc;
+      border: 1px solid #999;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+      box-sizing: border-box; /* Inclui padding e border no tamanho total do bloco */
+  }
     .card-body span {
         display: block;
         margin-bottom: 5px;
@@ -44,25 +72,6 @@
             margin-bottom: 0;
         }
     }
-</style>
-<style>
-  #colorButton {
-      width: 150px; /* Ajuste conforme necessário */
-      height: 150px; /* Ajuste conforme necessário */
-      border: none;
-      background-image: url('imagem.jpg'); /* Substitua pelo caminho da sua imagem */
-      background-size: cover;
-      background-position: center;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      background-blend-mode: multiply; /* Ajuste o modo de mistura conforme necessário */
-  }
-
-  /* Cores usadas para a sobreposição */
-  .color1 { background-color: red; }
-  .color2 { background-color: green; }
-  .color3 { background-color: blue; }
-  .color4 { background-color: orange; }
 </style>
 
   <!-- =======================================================
@@ -265,21 +274,66 @@
     </ul><hr>
         <!-- Exiba os detalhes do odontograma -->
         <table>
-          <form method="post" style="margin-left: 1%;">
-            <img src="{% static "img/odontograma.PNG" %}">
-            {% csrf_token %}
-            {% for field in dente %}
-            
-                <div>
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="error">{{ field.errors }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-            <button style="margin-left: 1%" class="btn btn-primary" type="submit">Salvar Anotação</button>
-        </form><hr>
+          <img src="{% static "img/odontograma.PNG" %}" style="position: absolute; width: 660px; margin-top: 1550px; pointer-events: none; z-index: 10;">
+        <!--  -->
+        <div style="
+        width: 675px;
+        height: 460px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 115px 65px;
+        padding-top: 70px;
+        padding-left:60px;
+        box-sizing: border-box;
+        
+    ">
+        <div id="grid" style="
+            display: grid;
+            grid-template-columns: repeat(16, 32px);
+            grid-template-rows: repeat(2, 145px);
+            gap: 2px;
+            width: 100%;
+            height: 100%;
+        ">
+            <!-- Blocos serão adicionados pelo JavaScript -->
+        </div>
+    </div>
+    <script>
+        const grid = document.getElementById('grid');
+        const colors = ['#FF5733', '#33FF57']; // Apenas duas cores
+        const maxClicks = 5;
+
+        // Cria os blocos e os adiciona à grade
+        for (let i = 0; i < 32; i++) {
+            const block = document.createElement('div');
+            block.style.backgroundColor = '#cccccc';
+            block.style.border = '1px solid #999';
+            block.style.transition = 'background-color 0.3s ease';
+            block.style.cursor = 'pointer';
+            block.style.boxSizing = 'border-box';
+            block.style.width = '100%';
+            block.style.height = '100%';
+            block.dataset.clicks = 0; // Inicializa o contador de cliques
+            block.dataset.colorIndex = 0; // Inicializa o índice da cor
+            block.addEventListener('click', () => {
+                const currentClicks = parseInt(block.dataset.clicks, 10);
+                if (currentClicks < maxClicks) {
+                    const colorIndex = parseInt(block.dataset.colorIndex, 10);
+                    block.style.backgroundColor = colors[colorIndex];
+                    block.dataset.colorIndex = (colorIndex + 1) % colors.length;
+                    block.dataset.clicks = currentClicks + 1;
+                } else {
+                    block.dataset.clicks = 0; // Reseta o contador de cliques após o ciclo
+                    block.dataset.colorIndex = 0; // Reseta o índice da cor
+                    block.style.backgroundColor = '#cccccc'; // Volta para a cor inicial
+                }
+            });
+            grid.appendChild(block);
+        }
+    </script>
+
             <!-- Adicione mais campos conforme necessário -->
         </table>
     <hr>
@@ -337,6 +391,33 @@
   <script src="{% static "vendor/simple-datatables/simple-datatables.js" %}"></script>
   <script src="{% static "vendor/tinymce/tinymce.min.js" %}"></script>
   <script src="{% static "vendor/php-email-form/validate.js" %}"></script>
+  <script>
+    const grid = document.querySelector('.grid');
+    const colors = ['#FF5733', '#33FF57']; // Apenas duas cores
+    const maxClicks = 5;
+
+    // Cria os blocos e os adiciona à grade
+    for (let i = 0; i < 32; i++) {
+        const block = document.createElement('div');
+        block.className = 'block';
+        block.dataset.clicks = 0; // Inicializa o contador de cliques
+        block.dataset.colorIndex = 0; // Inicializa o índice da cor
+        block.addEventListener('click', () => {
+            const currentClicks = parseInt(block.dataset.clicks, 10);
+            if (currentClicks < maxClicks) {
+                const colorIndex = parseInt(block.dataset.colorIndex, 10);
+                block.style.backgroundColor = colors[colorIndex];
+                block.dataset.colorIndex = (colorIndex + 1) % colors.length;
+                block.dataset.clicks = currentClicks + 1;
+            } else {
+                block.dataset.clicks = 0; // Reseta o contador de cliques após o ciclo
+                block.dataset.colorIndex = 0; // Reseta o índice da cor
+                block.style.backgroundColor = '#cccccc'; // Volta para a cor inicial
+            }
+        });
+        grid.appendChild(block);
+    }
+</script>
 
   <!-- Template Main JS File -->
   <script src="{% static "js/main.js" %}"></script>
