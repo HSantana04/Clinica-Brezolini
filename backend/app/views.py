@@ -28,9 +28,9 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from app.models import EventMember, Event, Anotacao, Odontograma
+from app.models import EventMember, Event, Anotacao, Odontograma, Block
 from app.utils import Calendar
-from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm
+from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, BlockForm
 from django.db.models import Count
 from django.db.models.functions import TruncDay
 
@@ -261,6 +261,8 @@ def pagina_paciente(request, paciente_id):
     paciente = get_object_or_404(Paciente, id=paciente_id)
     eventos = Event.objects.filter(paciente=paciente)
     anotacoes = Anotacao.objects.filter(paciente=paciente)
+    
+    # Adiciona ou obtém a instância do odontograma
     odontograma, created = Odontograma.objects.get_or_create(paciente=paciente)
 
     if request.method == 'POST':
@@ -275,22 +277,59 @@ def pagina_paciente(request, paciente_id):
         if dente_form.is_valid():
             dente_form.save()
 
+        # Atualiza o estado dos blocos
+        block_id = request.POST.get('block_id')
+        if block_id:
+            color = request.POST.get('color', '#cccccc')
+            position_x = int(request.POST.get('position_x', 0))
+            position_y = int(request.POST.get('position_y', 0))
+            clicks = int(request.POST.get('clicks', 0))
+
+            Block.objects.update_or_create(
+                paciente=paciente,
+                position_x=position_x,
+                position_y=position_y,
+                defaults={
+                    'color': color,
+                    'clicks': clicks,
+                }
+            )
+
         return redirect('pagina_paciente', paciente_id=paciente.id)
     else:
         form = AnotacaoForm()
         dente_form = DenteForm(instance=odontograma)
 
+    # Carrega o estado dos blocos
+    blocks = Block.objects.filter(paciente=paciente)
+    if request.method == 'POST':
+        block_id = request.POST.get('block_id')
+        color = request.POST.get('color')
+        position_x = request.POST.get('position_x')
+        position_y = request.POST.get('position_y')
+        clicks = request.POST.get('clicks')
+
+        if block_id:
+            block = Block.objects.get(id=block_id)
+        else:
+            block = Block(position_x=position_x, position_y=position_y)
+
+        block.color = color
+        block.clicks = clicks
+        block.save()
+
+        return redirect('pagina_paciente', paciente_id=paciente.id)
     context = {
         "object": paciente,
         "eventos": eventos,
         "anotacoes": anotacoes,
         "form": form,
         "odontograma": odontograma,
-        "dente": dente_form
+        "dente": dente_form,
+        "blocks": blocks
     }
 
     return render(request, 'frontend/pagina_paciente.html', context)
-
 @has_role_decorator('administrador')
 @login_required(login_url="/")
 def pagina_financeiro(request):

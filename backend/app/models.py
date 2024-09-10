@@ -41,6 +41,14 @@ class Paciente(models.Model):
     Estado = models.CharField(max_length=100, blank=False, null=True)
     def __str__(self):
         return '{}'.format(self.Nome, self.id)
+    
+class Block(models.Model):
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    position_x = models.PositiveIntegerField()
+    position_y = models.PositiveIntegerField()
+    color = models.CharField(max_length=7, default='#cccccc')
+    clicks = models.PositiveIntegerField(default=0)
+
 class Cadeira(models.Model):
     nome=models.CharField(max_length=100, blank=True, null=True)
 class Agendar(models.Model):

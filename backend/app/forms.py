@@ -1,5 +1,5 @@
 from django.forms import ModelForm, DateInput
-from app.models import EventMember, Event, Paciente, Anotacao, Odontograma
+from app.models import EventMember, Event, Paciente, Anotacao, Odontograma, Block
 from django import forms
 
 
@@ -109,3 +109,7 @@ class DenteForm(forms.ModelForm):
         fields = '__all__'  # Inclui todos os campos do modelo  # Inclui todos os campos do modelo
         
 
+class BlockForm(forms.ModelForm):
+    class Meta:
+        model = Block
+        fields = ['color', 'position_x', 'position_y', 'clicks']
