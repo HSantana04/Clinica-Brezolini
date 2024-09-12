@@ -44,8 +44,7 @@ class Paciente(models.Model):
     
 class Block(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
-    position_x = models.PositiveIntegerField()
-    position_y = models.PositiveIntegerField()
+    id_bloco = models.IntegerField()
     color = models.CharField(max_length=7, default='#cccccc')
     clicks = models.PositiveIntegerField(default=0)
 

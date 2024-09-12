@@ -112,4 +112,4 @@ class DenteForm(forms.ModelForm):
 class BlockForm(forms.ModelForm):
     class Meta:
         model = Block
-        fields = ['color', 'position_x', 'position_y', 'clicks']
+        fields = []
