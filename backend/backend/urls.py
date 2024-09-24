@@ -58,5 +58,7 @@ urlpatterns = [
         views.RunningEventsListView.as_view(),
         name="running_events",
     ),
+    path('salvar_desenho/<int:paciente_id>/', views.salvar_desenho, name='salvar_desenho'),
+    path('financeiro', views.financeiro)
     
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

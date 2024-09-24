@@ -142,39 +142,8 @@ class Anotacao(models.Model):
         return f'Anotação de {self.paciente.nome} - {self.data_criacao}'
     
 class Odontograma(models.Model):
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='odontograma')
-    dente1=models.TextField(blank=True, null=True)
-    dente2=models.TextField(blank=True, null=True)
-    dente3=models.TextField(blank=True, null=True)
-    dente4=models.TextField(blank=True, null=True)
-    dente5=models.TextField(blank=True, null=True)
-    dente6=models.TextField(blank=True, null=True)
-    dente7=models.TextField(blank=True, null=True)
-    dente8=models.TextField(blank=True, null=True)
-    dente9=models.TextField(blank=True, null=True)
-    dente10=models.TextField(blank=True, null=True)
-    dente11=models.TextField(blank=True, null=True)
-    dente12=models.TextField(blank=True, null=True)
-    dente13=models.TextField(blank=True, null=True)
-    dente14=models.TextField(blank=True, null=True)
-    dente15=models.TextField(blank=True, null=True)
-    dente16=models.TextField(blank=True, null=True)
-    dente17=models.TextField(blank=True, null=True)
-    dente18=models.TextField(blank=True, null=True)
-    dente19=models.TextField(blank=True, null=True)
-    dente20=models.TextField(blank=True, null=True)
-    dente21=models.TextField(blank=True, null=True)
-    dente22=models.TextField(blank=True, null=True)
-    dente23=models.TextField(blank=True, null=True)
-    dente24=models.TextField(blank=True, null=True)
-    dente25=models.TextField(blank=True, null=True)
-    dente26=models.TextField(blank=True, null=True)
-    dente27=models.TextField(blank=True, null=True)
-    dente28=models.TextField(blank=True, null=True)
-    dente29=models.TextField(blank=True, null=True)
-    dente30=models.TextField(blank=True, null=True)
-    dente31=models.TextField(blank=True, null=True)
-    dente32=models.TextField(blank=True, null=True)
+    paciente = models.OneToOneField(Paciente, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='static/img', blank=True, null=True)
 
-
-#anamnese: Como chegou ate nos, e esta em tratamento
+    def __str__(self):
+        return f"Odontograma de {self.paciente.nome}"

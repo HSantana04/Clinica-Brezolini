@@ -29,6 +29,26 @@
   <link href="{% static "css/style.css" %}" rel="stylesheet">
   
   <style>
+    #container {
+      position: relative;
+      width: 800px;
+      height: 600px;
+  }
+
+  #drawingCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1; /* Canvas abaixo */
+  }
+
+  #imageOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2; /* Imagem acima */
+      pointer-events: none; /* A imagem não impede o desenho no canvas */
+  }
     .container {
       width: 660px;
       height: 387px;
@@ -95,12 +115,7 @@
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
 
-    <div class="search-bar">
-      <form class="search-form d-flex align-items-center" method="POST" action="#">
-        <input type="text" name="query" placeholder="Search" title="Enter search keyword">
-        <button type="submit" title="Search"><i class="bi bi-search"></i></button>
-      </form>
-    </div><!-- End Search Bar -->
+    <!-- End Search Bar -->
 
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
@@ -273,69 +288,28 @@
         {% endfor %}
     </ul><hr>
         <!-- Exiba os detalhes do odontograma -->
-        <table>
-          <img src="{% static "img/odontograma.PNG" %}" style="position: absolute; width: 660px; margin-top: 1340px; pointer-events: none; z-index: 10;">
-        <!--  -->
-        <div style="
-        width: 675px;
-        height: 460px;
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 115px 65px;
-        padding-top: 40px;
-        padding-left:60px;
-        box-sizing: border-box;
-        
-    ">
-        <div id="grid" style="
-            display: grid;
-            grid-template-columns: repeat(16, 32px);
-            grid-template-rows: repeat(2, 145px);
-            gap: 2px;
-            width: 100%;
-            height: 100%;
-        ">
-            <!-- Blocos serão adicionados pelo JavaScript -->
-        </div>
-    </div>
-    <script>
-        const grid = document.getElementById('grid');
-        const colors = ['#FF5733', '#33FF57']; // Apenas duas cores
-        const maxClicks = 5;
-
-        // Cria os blocos e os adiciona à grade
-        for (let i = 0; i < 32; i++) {
-            const block = document.createElement('div');
-            block.style.backgroundColor = '#cccccc';
-            block.style.border = '1px solid #999';
-            block.style.transition = 'background-color 0.3s ease';
-            block.style.cursor = 'pointer';
-            block.style.boxSizing = 'border-box';
-            block.style.width = '100%';
-            block.style.height = '100%';
-            block.dataset.clicks = 0; // Inicializa o contador de cliques
-            block.dataset.colorIndex = 0; // Inicializa o índice da cor
-            block.addEventListener('click', () => {
-                const currentClicks = parseInt(block.dataset.clicks, 10);
-                if (currentClicks < maxClicks) {
-                    const colorIndex = parseInt(block.dataset.colorIndex, 10);
-                    block.style.backgroundColor = colors[colorIndex];
-                    block.dataset.colorIndex = (colorIndex + 1) % colors.length;
-                    block.dataset.clicks = currentClicks + 1;
-                } else {
-                    block.dataset.clicks = 0; // Reseta o contador de cliques após o ciclo
-                    block.dataset.colorIndex = 0; // Reseta o índice da cor
-                    block.style.backgroundColor = '#cccccc'; // Volta para a cor inicial
-                }
-            });
-            grid.appendChild(block);
-        }
-    </script>
-
-            <!-- Adicione mais campos conforme necessário -->
-        </table>
+        <div>
+          <label for="color">Cor:</label>
+          <input type="color" id="color" value="#000000">
+          <label for="size">Tamanho:</label>
+          <input type="number" id="size" value="5" min="1" max="50">
+          <button id="eraser">Borracha</button>
+          <button id="pen">Caneta</button>
+      </div>
+  
+      <div id="container">
+          <canvas id="drawingCanvas" width="800" height="600"></canvas>
+          <img id="imageOverlay" src="{% static "img/odontograma.png" %}" width="800" height="600" alt="Imagem de Referência">
+      </div>
+      
+      
+      <button id="saveDrawing">Salvar Desenho</button>
+      {% if odontograma.image %}
+    <img src="{{ odontograma.image.url }}" alt="Odontograma do paciente">
+    
+{% else %}
+    <p>Sem imagem do odontograma</p>
+{% endif %}
     <hr>
       </div>
   
@@ -360,26 +334,7 @@
 
   <!-- ======= Footer ======= -->
   
-  <script>
-    // JavaScript para alterar a cor de sobreposição
-    const button = document.getElementById('colorButton');
-
-    let colorIndex = 0;
-    const colors = ['color1', 'color2', 'color3', 'color4'];
-
-    button.classList.add(colors[colorIndex]);
-
-    button.addEventListener('click', () => {
-        // Remove a classe de cor atual
-        button.classList.remove(colors[colorIndex]);
-
-        // Atualiza o índice da cor
-        colorIndex = (colorIndex + 1) % colors.length;
-
-        // Adiciona a nova classe de cor
-        button.classList.add(colors[colorIndex]);
-    });
-</script>
+  
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->
@@ -391,37 +346,92 @@
   <script src="{% static "vendor/simple-datatables/simple-datatables.js" %}"></script>
   <script src="{% static "vendor/tinymce/tinymce.min.js" %}"></script>
   <script src="{% static "vendor/php-email-form/validate.js" %}"></script>
-  <script>
-    const grid = document.querySelector('.grid');
-    const colors = ['#FF5733', '#33FF57']; // Apenas duas cores
-    const maxClicks = 5;
-
-    // Cria os blocos e os adiciona à grade
-    for (let i = 0; i < 32; i++) {
-        const block = document.createElement('div');
-        block.className = 'block';
-        block.dataset.clicks = 0; // Inicializa o contador de cliques
-        block.dataset.colorIndex = 0; // Inicializa o índice da cor
-        block.addEventListener('click', () => {
-            const currentClicks = parseInt(block.dataset.clicks, 10);
-            if (currentClicks < maxClicks) {
-                const colorIndex = parseInt(block.dataset.colorIndex, 10);
-                block.style.backgroundColor = colors[colorIndex];
-                block.dataset.colorIndex = (colorIndex + 1) % colors.length;
-                block.dataset.clicks = currentClicks + 1;
-            } else {
-                block.dataset.clicks = 0; // Reseta o contador de cliques após o ciclo
-                block.dataset.colorIndex = 0; // Reseta o índice da cor
-                block.style.backgroundColor = '#cccccc'; // Volta para a cor inicial
-            }
-        });
-        grid.appendChild(block);
-    }
-</script>
+  
 
   <!-- Template Main JS File -->
   <script src="{% static "js/main.js" %}"></script>
+  <script>
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let isErasing = false;
 
+    const colorInput = document.getElementById('color');
+    const sizeInput = document.getElementById('size');
+    const eraserButton = document.getElementById('eraser');
+    const penButton = document.getElementById('pen');
+
+    // Alternar para o modo borracha
+    eraserButton.addEventListener('click', () => {
+        isErasing = true;
+    });
+
+    // Alternar para o modo caneta
+    penButton.addEventListener('click', () => {
+        isErasing = false;
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        draw(e);
+    });
+
+    canvas.addEventListener('mousemove', draw);
+
+    canvas.addEventListener('mouseup', () => {
+        isDrawing = false;
+        ctx.beginPath();
+    });
+
+    function draw(e) {
+        if (!isDrawing) return;
+
+        // Obter a posição correta do canvas
+        const rect = canvas.getBoundingClientRect();
+
+        ctx.lineWidth = sizeInput.value;
+        ctx.lineCap = 'round';
+
+        if (isErasing) {
+            // Apagar como no Paint
+            ctx.clearRect(e.clientX - rect.left - sizeInput.value / 2, 
+                         e.clientY - rect.top - sizeInput.value / 2, 
+                         sizeInput.value, 
+                         sizeInput.value);
+        } else {
+            // Desenhar normalmente
+            ctx.strokeStyle = colorInput.value;
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+    }
+    const saveButton = document.getElementById('saveDrawing');
+
+    saveButton.addEventListener('click', () => {
+        const canvasData = canvas.toDataURL(); // Converte o canvas para Base64
+        
+        // Cria um objeto de requisição POST
+        fetch("{% url 'salvar_desenho' paciente.id %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}', // Django requer o token CSRF para POSTs
+            },
+            body: JSON.stringify({ image: canvasData }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Desenho salvo com sucesso!");
+            } else {
+                alert("Erro ao salvar o desenho.");
+            }
+        })
+        .catch(error => console.error('Erro:', error));
+    });
+</script>
 </body>
 
 </html>

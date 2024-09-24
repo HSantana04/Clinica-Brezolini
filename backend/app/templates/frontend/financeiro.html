@@ -27,17 +27,6 @@
 
   <!-- Template Main CSS File -->
   <link href="{% static "css/style.css" %}" rel="stylesheet">
-  <script>
-    function validateForm() {
-      var password = document.getElementById('inputPassword').value;
-      var confirmPassword = document.getElementById('inputConfirmPassword').value;
-      if (password !== confirmPassword) {
-        alert('As senhas não coincidem.');
-        return false;
-      }
-      return true;
-    }
-  </script>
 
   <!-- =======================================================
   * Template Name: NiceAdmin
@@ -54,13 +43,13 @@
   <header id="header" class="header fixed-top d-flex align-items-center" style="background-color:rgb(76, 87, 90);">
 
     <div class="d-flex align-items-center justify-content-between" >
-      <a href="{% url 'index'%}" class="d-flex align-items-center">
+      <a href="index" class="d-flex align-items-center">
         <img src="{% static "img/brezoliniodontologia.PNG" %}" height="50px">
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
 
-    <!-- End Search Bar -->
+   <!-- End Search Bar -->
 
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
@@ -110,13 +99,13 @@
             </li>
 
             <li>
-                <form action="{% url 'logout' %}" method="POST" class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}">{%csrf_token%}
-                  <button class="dropdown-item d-flex align-items-center" type="submit">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Fazer logout</span>
-                  </button>
-                </form>
-            </li>
+              <form action="{% url 'logout' %}" method="POST" class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}">{%csrf_token%}
+                <button class="dropdown-item d-flex align-items-center" type="submit">
+                  <i class="bi bi-box-arrow-right"></i>
+                  <span>Fazer logout</span>
+                </button>
+              </form>
+          </li>
 
           </ul><!-- End Profile Dropdown Items -->
         </li><!-- End Profile Nav -->
@@ -131,30 +120,31 @@
 
     <ul class="sidebar-nav" id="sidebar-nav">
 
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'index'%}">
-              <i class="bi bi-grid"></i>
-              <span>Dashboard</span>
-            </a>
-          </li><!-- End Dashboard Nav -->
-          <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'pacientes'%}">
-              <i class="bi bi-person"></i>
-              <span>Pacientes</span>
-            </a>
-          </li><!-- End Dashboard Nav -->
-          <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'calendario' %}">
-              <i class="bi bi-calendar"></i>
-              <span>Calendario</span>
-            </a>
-          </li><!-- End Dashboard Nav -->
-          <li class="nav-item">
-            <a class="nav-link collapsed" href="financeiro">
-              <i class="bi bi-currency-dollar"></i>
-              <span>Financeiro</span>
-            </a>
-          </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="index">
+          <i class="bi bi-grid"></i>
+          <span>Dashboard</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="pacientes">
+          <i class="bi bi-person"></i>
+          <span>Pacientes</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="calendario">
+          <i class="bi bi-calendar"></i>
+          <span>Calendario</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+      <li class="nav-item">
+        <a class="nav-link " href="financeiro">
+          <i class="bi bi-currency-dollar"></i>
+          <span>Financeiro</span>
+        </a>
+      </li>
+
       
 
     </ul>
@@ -164,28 +154,95 @@
   <main id="main" class="main" backgor>
 
     <div class="pagetitle">
-      <h1>Dashboard</h1>
+      <h1>Financeiro</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{% url 'index'%}">Home</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
+          <li class="breadcrumb-item"><a href="index">Home</a></li>
+          <li class="breadcrumb-item active">Financeiro</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
 
     <section class="section dashboard">
-        
-    <div class="card">
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary mt-3 btn-block">Salvar</button>
-                <a href="{% url 'pacientes' %}" class="btn btn-secondary mt-3 btn-block">Voltar para a lista de pacientes</a>
-            </form>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Listagem de Transações</h5>
+      
+                    <table class="table" id="transactionTable">
+                      <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Descrição</th>
+                          <th scope="col">Valor</th>
+                          <th scope="col">Tipo</th>
+                          <th scope="col">Ação</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- As transações serão listadas aqui -->
+                      </tbody>
+                    </table>
+      
+                  </div>
+                </div>
+              </div>
+          <!-- Formulário de Adição de Transações -->
+          <div class="col-lg-4">
+            <div class="card info-card Consultas-card">
+
+                
+
+                <div class="card-body">
+                  <h5 class="card-title">Total de pacientes<span>| Mês</span></h5>
+
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-people"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{total_pacientes_mes_atual }}</h6>
+                      
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Adicionar Transação</h5>
+  
+                <form id="transactionForm">
+                  <div class="mb-3">
+                    <label for="description" class="form-label">Descrição</label>
+                    <input type="text" class="form-control" id="description" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="value" class="form-label">Valor</label>
+                    <input type="number" class="form-control" id="value" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="type" class="form-label">Tipo</label>
+                    <select class="form-select" id="type" required>
+                      <option value="Entrada">Entrada</option>
+                      <option value="Saída">Saída</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Tabela de Listagem de Transações -->
+          
+  
         </div>
-    </div><!-- End Card with titles, buttons, and links -->
-    </section>
+      
+  
+      </section>
 
   </main><!-- End #main -->
 

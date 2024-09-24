@@ -33,8 +33,15 @@ from app.utils import Calendar
 from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, BlockForm
 from django.db.models import Count
 from django.db.models.functions import TruncDay
-
-
+import base64
+from io import BytesIO
+from PIL import Image
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import base64
+from django.core.files.base import ContentFile
+import json
 @login_required(login_url="/")
 def index(request):
     # Obtém a data e hora atual
@@ -96,6 +103,9 @@ def index(request):
     }
     
     return render(request, 'frontend/index.html', context)
+
+def financeiro(request):
+    return render(request, 'frontend/financeiro.html')
 
 def login(request):
     if request.user.is_authenticated:
@@ -261,7 +271,7 @@ def pagina_paciente(request, paciente_id):
     paciente = get_object_or_404(Paciente, id=paciente_id)
     eventos = Event.objects.filter(paciente=paciente)
     anotacoes = Anotacao.objects.filter(paciente=paciente)
-    
+
     # Adiciona ou obtém a instância do odontograma
     odontograma, created = Odontograma.objects.get_or_create(paciente=paciente)
 
@@ -277,18 +287,11 @@ def pagina_paciente(request, paciente_id):
         if dente_form.is_valid():
             dente_form.save()
 
-        # Atualiza o estado dos blocos
-        
-
         return redirect('pagina_paciente', paciente_id=paciente.id)
     else:
         form = AnotacaoForm()
         dente_form = DenteForm(instance=odontograma)
 
-    # Carrega o estado dos blocos
-    
-  
-        
     context = {
         "object": paciente,
         "eventos": eventos,
@@ -296,9 +299,32 @@ def pagina_paciente(request, paciente_id):
         "form": form,
         "odontograma": odontograma,
         "dente": dente_form,
+        "paciente": paciente,  # Adicione a variável paciente explicitamente
     }
 
     return render(request, 'frontend/pagina_paciente.html', context)
+
+def salvar_desenho(request, paciente_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        image_data = data.get('image')
+
+        if image_data:
+            # Decodifica a imagem em Base64
+            format, imgstr = image_data.split(';base64,')
+            ext = format.split('/')[-1]
+            img_data = ContentFile(base64.b64decode(imgstr), name=f"odontograma_{paciente_id}.{ext}")
+
+            # Salva a imagem no modelo Odontograma
+            odontograma = Odontograma.objects.get(paciente_id=paciente_id)
+            odontograma.image.save(f'odontograma_{paciente_id}.{ext}', img_data)
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Imagem não encontrada'}, status=400)
+    else:
+        return JsonResponse({'success': False, 'error': 'Método inválido'}, status=400)
+
 @has_role_decorator('administrador')
 @login_required(login_url="/")
 def pagina_financeiro(request):
@@ -549,3 +575,4 @@ def editar_paciente(request, paciente_id):
         form = PacienteForm(instance=paciente)
 
     return render(request, 'frontend/editar_paciente.html', {'form': form})
+
