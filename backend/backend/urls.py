@@ -59,6 +59,6 @@ urlpatterns = [
         name="running_events",
     ),
     path('salvar_desenho/<int:paciente_id>/', views.salvar_desenho, name='salvar_desenho'),
-    path('financeiro', views.financeiro)
+    path('financeiro', views.financeiro, name="financeiro")
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
