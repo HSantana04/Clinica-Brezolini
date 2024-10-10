@@ -170,6 +170,7 @@
           <div class="col-lg-12">
             <div class="card">
                 <div class="card-body">
+                
                 <h5 class="card-title">Cadastrar</h5>
                 <a href="cadastrar_paciente"> <button type="button" class="btn btn-primary w-25">Cadastrar Paciente</button></a>
                 <a href="pacientes"><button type="button" class="btn btn-secondary w-25">Localizar Paciente</button></a>
@@ -181,19 +182,20 @@
                 <!-- Table with stripped rows -->
                 <div class="card">
                     <div class="card-body">
+                      <p>*Campos Obrigatorio</p>
                       <h5 class="card-title">Cadastrar Paciente</h5>
         
                       <!-- General Form Elements -->
                       <form action={% url 'cadastrar_paciente' %} method="POST" onsubmit="return validateForm()" >  {% csrf_token %}
                         <div class="row mb-3">
-                          <label for="inputText" class="col-sm-2 col-form-label">Nome</label>
+                          <label for="inputText" class="col-sm-2 col-form-label">Nome*</label>
                           <div class="col-sm-10">
                             <input type="text" class="form-control" name="nome" id="inputText" required>
                           </div>
                         </div>
                         
                         <fieldset class="row mb-3">
-                            <legend class="col-form-label col-sm-2 pt-0">Gênero</legend>
+                            <legend class="col-form-label col-sm-2 pt-0">Gênero*</legend>
                             <div class="col-sm-10">
                               <div class="form-check">
                                 <input class="form-check-input" type="radio" name="genero" id="gridRadios1" value="Masculino" checked>
@@ -216,7 +218,7 @@
                             </div>
                           </fieldset>
                           <div class="row mb-3">
-                            <label for="inputDate" class="col-sm-2 col-form-label">Data de cadastro 
+                            <label for="inputDate" class="col-sm-2 col-form-label">Data de cadastro*
                             </label>
                             <div class="col-sm-10">
                               <input type="date" name="data_cadastro" class="form-control">
@@ -225,14 +227,14 @@
                         
                         
                         <div class="row mb-3">
-                          <label for="inputDate" class="col-sm-2 col-form-label">Data de nascimento
+                          <label for="inputDate" class="col-sm-2 col-form-label">Data de nascimento*
                           </label>
                           <div class="col-sm-10">
                             <input type="date" class="form-control" name="data_nascimento">
                           </div>
                         </div>                            
                         <div class="row mb-3">
-                          <label for="inputText" class="col-sm-2 col-form-label">Observações</label>
+                          <label for="inputText" class="col-sm-2 col-form-label">Observações*</label>
                           <div class="col-sm-10">
                             <textarea class="form-control" name="observaçoes" style="height: 100px"></textarea>
                           </div>
@@ -240,13 +242,13 @@
                         
                           
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Local de nascimento</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">Local de nascimento*</label>
                             <div class="col-sm-10">
                               <input type="text" name="local_nascimento" class="form-control">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label">Estado civil</label>
+                            <label class="col-sm-2 col-form-label">Estado civil*</label>
                             <div class="col-sm-10">
                               <select class="form-select" name="estado_civil" aria-label="Default select example">
                                 <option selected></option>
@@ -259,7 +261,7 @@
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label">Grupo</label>
+                            <label class="col-sm-2 col-form-label">Grupo*</label>
                             <div class="col-sm-10">
                               <select name="grupo" class="form-select" aria-label="Default select example">
                                 <option selected value="Definitivo">Definitivo</option>
@@ -271,7 +273,7 @@
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label">Situação atual</label>
+                            <label class="col-sm-2 col-form-label">Situação atual*</label>
                             <div class="col-sm-10">
                               <select class="form-select" name="situacao_atual" aria-label="Default select example">
                                 <option selected value="1ªConsulta">1ªConsulta</option>
@@ -312,11 +314,11 @@
                           <div class="container mt-5">
                               <div class="row mb-3">
                                 <div class="col-md-6">
-                                  <label for="celular" class="form-label">Celular</label>
+                                  <label for="celular" class="form-label">Celular*</label>
                                   <input type="tel" nama="celular" class="form-control" id="celular" placeholder="(XX) XXXXX-XXXX">
                                 </div>
                                 <div class="col-md-6">
-                                  <label for="email" class="form-label">Email</label>
+                                  <label for="email" class="form-label">Email*</label>
                                   <input type="email" name="email" class="form-control" id="email" placeholder="email@example.com">
                                 </div>
                               </div>
@@ -325,44 +327,44 @@
                           <h4 class="card-title">Endereço</h4>   
                           
                         <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">CEP:</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">CEP:*</label>
                             <div class="col-sm-10">
                                 <input type="text" name="cep" class="form-control" id="cep" placeholder="Digite o seu CEP" maxlength="9">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Endereço</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">Endereço*</label>
                             <div class="col-sm-10">
                               <input type="text" name="endereço" class="form-control">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Número</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">Número*</label>
                             <div class="col-sm-10">
                               <input type="text" name="numero" class="form-control">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Complemento</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">Complemento*</label>
                             <div class="col-sm-10">
                               <input type="text" name="complemento" class="form-control">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Bairro</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">Bairro*</label>
                             <div class="col-sm-10">
                               <input type="text" name="bairro" class="form-control">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Cidade</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">Cidade*</label>
                             <div class="col-sm-10">
                               <input type="text" name="cidade" class="form-control">
                             </div>
                           </div>
                           
                           <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label">Estado</label>
+                            <label class="col-sm-2 col-form-label">Estado*</label>
                             <div class="col-sm-10">
                               <select class="form-select" name="Estado" aria-label="Default select example">
                                 <option selected></option>
@@ -400,25 +402,25 @@
                           <hr>
                           <h4 class="card-title">Documentos</h4>
                           <div class="row mb-3">
-                            <label for="inputNumber" class="col-sm-2 col-form-label">CPF</label>
+                            <label for="inputNumber" class="col-sm-2 col-form-label">CPF*</label>
                             <div class="col-sm-10">
                               <input type="number" name="cpf" class="form-control" placeholder="000.000.000-00">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputNumber" class="col-sm-2 col-form-label">RG</label>
+                            <label for="inputNumber" class="col-sm-2 col-form-label">RG*</label>
                             <div class="col-sm-10">
                               <input type="text" name="rg" class="form-control" placeholder="00.000.000-0">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Órgão emissor</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">Órgão emissor*</label>
                             <div class="col-sm-10">
                               <input type="text" name="orgao_emissor" class="form-control">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label">Convénio</label>
+                            <label class="col-sm-2 col-form-label">Convénio*</label>
                             <div class="col-sm-10">
                               <select class="form-select" name="convénio" aria-label="Default select example">
                                 <option selected></option>
@@ -428,13 +430,13 @@
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Plano</label>
+                            <label for="inputText" class="col-sm-2 col-form-label">Plano*</label>
                             <div class="col-sm-10">
                               <input type="text" nama="plano" class="form-control">
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label for="inputDate" class="col-sm-2 col-form-label">Data de adesão
+                            <label for="inputDate" class="col-sm-2 col-form-label">Data de adesão*
                             </label>
                             <div class="col-sm-10">
                               <input type="date" name="data_adesao" class="form-control">

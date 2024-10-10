@@ -92,30 +92,30 @@
   <!-- ======= Sidebar ======= -->
   <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="index">
-              <i class="bi bi-grid"></i>
-              <span>Dashboard</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link collapsed" href="pacientes">
-              <i class="bi bi-person"></i>
-              <span>Pacientes</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link collapsed" href="calendario">
-              <i class="bi bi-calendar"></i>
-              <span>Calendário</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link collapsed" href="financeiro">
-              <i class="bi bi-currency-dollar"></i>
-              <span>Financeiro</span>
-            </a>
-          </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'index'%}">
+          <i class="bi bi-grid"></i>
+          <span>Dashboard</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'pacientes'%}">
+          <i class="bi bi-person"></i>
+          <span>Pacientes</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'calendario' %}">
+          <i class="bi bi-calendar"></i>
+          <span>Calendario</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'financeiro'%}">
+          <i class="bi bi-currency-dollar"></i>
+          <span>Financeiro</span>
+        </a>
+      </li>
     </ul>
   </aside><!-- End Sidebar -->
 

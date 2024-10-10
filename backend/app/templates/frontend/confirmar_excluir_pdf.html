@@ -92,41 +92,41 @@
   <!-- ======= Sidebar ======= -->
   <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'index'%}">
-          <i class="bi bi-grid"></i>
-          <span>Dashboard</span>
-        </a>
-      </li><!-- End Dashboard Nav -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'pacientes'%}">
-          <i class="bi bi-person"></i>
-          <span>Pacientes</span>
-        </a>
-      </li><!-- End Dashboard Nav -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'calendario' %}">
-          <i class="bi bi-calendar"></i>
-          <span>Calendario</span>
-        </a>
-      </li><!-- End Dashboard Nav -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'financeiro'%}">
-          <i class="bi bi-currency-dollar"></i>
-          <span>Financeiro</span>
-        </a>
-      </li>
-    </ul>
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="{% url 'index'%}">
+            <i class="bi bi-grid"></i>
+            <span>Dashboard</span>
+          </a>
+        </li><!-- End Dashboard Nav -->
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="{% url 'pacientes'%}">
+            <i class="bi bi-person"></i>
+            <span>Pacientes</span>
+          </a>
+        </li><!-- End Dashboard Nav -->
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="{% url 'calendario' %}">
+            <i class="bi bi-calendar"></i>
+            <span>Calendario</span>
+          </a>
+        </li><!-- End Dashboard Nav -->
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="{% url 'financeiro'%}">
+            <i class="bi bi-currency-dollar"></i>
+            <span>Financeiro</span>
+          </a>
+        </li>
+      </ul>
   </aside><!-- End Sidebar -->
 
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Deletar Transação</h1>
+      <h1>Deletar Arquivo</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index">Home</a></li>
-          <li class="breadcrumb-item active">Deletar Transação</li>
+          <li class="breadcrumb-item active">Deletar Arquivo</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -135,10 +135,10 @@
       <div class="card">
         <div class="card-body">
           <form method="post"> {% csrf_token %}
-            <h5 class="card-title">Deletando a transação: {{ item.descricao }}</h5>
-            <p class="card-text">Tem certeza que quer deletar esta transação?</p>
+            <h5 class="card-title">Deletando o Arquivo: {{ object.pdf_file.name }}</h5>
+            <p class="card-text">Tem certeza que quer deletar esse arquivo?</p>
             <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
-            <p class="card-text"><a href="{% url 'financeiro'%}" class="btn btn-secondary">Cancelar</a></p>
+            <p class="card-text"><a href="{% url 'pagina_paciente' paciente_id=object.paciente_id %}" class="btn btn-secondary">Cancelar</a></p>
           </form>
         </div>
       </div><!-- End Card with titles, buttons, and links -->

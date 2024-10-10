@@ -64,5 +64,6 @@ urlpatterns = [
     path('salvar_desenho/<int:paciente_id>/', views.salvar_desenho, name='salvar_desenho'),
     path('financeiro', views.financeiro, name="financeiro"),
     path('pagina_paciente/<int:paciente_id>/delete/<int:anotacao_id>/', views.delete_anotacao, name='delete_anotacao'),
+    path('pagina_paciente/<int:paciente_id>/delete_pdf/<int:pdf_id>/', views.delete_pdf, name='delete_pdf'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

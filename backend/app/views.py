@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden,HttpResponseRedirect
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
@@ -15,6 +16,7 @@ from django.views import generic
 from datetime import timedelta, datetime, date
 from django.views.generic import ListView
 from app.utils import Calendar
+from django.contrib import messages
 import calendar
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
@@ -253,76 +255,90 @@ def cadastrar_paciente(request):
         pacientes = Paciente.objects.all()
         return render(request, 'frontend/cadastrar_paciente.html', {'pacientes': pacientes})
     else:
-        nome = request.POST.get('nome')
-        genero = request.POST.get('genero')
-        data_cadastro = request.POST.get('data_cadastro')
-        data_nascimento = request.POST.get('data_nascimento')
-        observaçoes = request.POST.get('observaçoes')
-        local_nascimento = request.POST.get('local_nascimento')
-        estado_civil = request.POST.get('estado_civil')
-        grupo = request.POST.get('grupo')
-        situacao_atual = request.POST.get('situacao_atual')
-        celular= request.POST.get('celular')
-        email= request.POST.get('email')
-        cep = request.POST.get('cep')
-        endereço = request.POST.get('endereço')
-        numero = request.POST.get('numero')
-        complemento = request.POST.get('complemento')
-        bairro = request.POST.get('bairro')
-        cidade = request.POST.get('cidade')
-        Estado = request.POST.get('Estado')
-        cpf = request.POST.get('cpf')
-        rg = request.POST.get('rg')
-        orgao_emissor = request.POST.get('orgao_emissor')
-        convénio = request.POST.get('convénio')
-        plano = request.POST.get('plano')
-        data_adesao = request.POST.get('data_adesao')
-        nome_pai = request.POST.get('nome_pai')
-        cpf_pai = request.POST.get('cpf_pai')
-        rg_pai = request.POST.get('rg_pai')
-        telefone_pai = request.POST.get('telefone_pai')
-        nome_mae = request.POST.get('nome_mae')
-        cpf_mae = request.POST.get('cpf_mae')
-        rg_mae = request.POST.get('rg_mae')
-        telefone_mae = request.POST.get('telefone_mae')
-        paciente = Paciente.objects.filter(Nome=nome).first()
-        paciente = Paciente(
-            Nome=nome,
-            genero=genero,
-            Data_cadastro=data_cadastro,
-            Data_Nascimento=data_nascimento,
-            observacoes=observaçoes,
-            local_nascimento=local_nascimento,
-            Estado_civil=estado_civil,
-            Situacao_atual=situacao_atual,
-            Email=email,
-            celular=celular,
-            Grupo=grupo,
-            CPF=cpf,
-            RG=rg,
-            Orgao_emissor=orgao_emissor,
-            Convenio=convénio,
-            Plano=plano,
-            Data_adesao=data_adesao,
-            Nome_pai=nome_pai,
-            CPF_pai=cpf_pai,
-            RG_pai=rg_pai,
-            Telefone_pai=telefone_pai,
-            Nome_mae=nome_mae,
-            Cpf_mae=cpf_mae,
-            Rg_mae=rg_mae,
-            Telefone_mae=telefone_mae,
-            CEP=cep,
-            Endereco=endereço,
-            Numero=numero,
-            Complemento=complemento,
-            Bairro=bairro,
-            Cidade=cidade,
-            Estado=Estado
-        )
-        paciente.save()
+        try:
+            # Pegando os dados do formulário
+            nome = request.POST.get('nome')
+            genero = request.POST.get('genero')
+            data_cadastro = request.POST.get('data_cadastro')
+            data_nascimento = request.POST.get('data_nascimento')
+            observacoes = request.POST.get('observaçoes')
+            local_nascimento = request.POST.get('local_nascimento')
+            estado_civil = request.POST.get('estado_civil')
+            grupo = request.POST.get('grupo')
+            situacao_atual = request.POST.get('situacao_atual')
+            celular = request.POST.get('celular')
+            email = request.POST.get('email')
+            cep = request.POST.get('cep')
+            endereco = request.POST.get('endereço')
+            numero = request.POST.get('numero')
+            complemento = request.POST.get('complemento')
+            bairro = request.POST.get('bairro')
+            cidade = request.POST.get('cidade')
+            estado = request.POST.get('Estado')
+            cpf = request.POST.get('cpf')
+            rg = request.POST.get('rg')
+            orgao_emissor = request.POST.get('orgao_emissor')
+            convenio = request.POST.get('convénio')
+            plano = request.POST.get('plano')
+            data_adesao = request.POST.get('data_adesao')
+            nome_pai = request.POST.get('nome_pai')
+            cpf_pai = request.POST.get('cpf_pai')
+            rg_pai = request.POST.get('rg_pai')
+            telefone_pai = request.POST.get('telefone_pai')
+            nome_mae = request.POST.get('nome_mae')
+            cpf_mae = request.POST.get('cpf_mae')
+            rg_mae = request.POST.get('rg_mae')
+            telefone_mae = request.POST.get('telefone_mae')
+            
+            # Validando se o paciente já existe
+            if Paciente.objects.filter(Nome=nome).exists():
+                raise ValidationError(f"Paciente com o nome {nome} já existe.")
+
+            # Criando o paciente
+            paciente = Paciente(
+                Nome=nome,
+                genero=genero,
+                Data_cadastro=data_cadastro,
+                Data_Nascimento=data_nascimento,
+                observacoes=observacoes,
+                local_nascimento=local_nascimento,
+                Estado_civil=estado_civil,
+                Situacao_atual=situacao_atual,
+                Email=email,
+                celular=celular,
+                Grupo=grupo,
+                CPF=cpf,
+                RG=rg,
+                Orgao_emissor=orgao_emissor,
+                Convenio=convenio,
+                Plano=plano,
+                Data_adesao=data_adesao,
+                Nome_pai=nome_pai,
+                CPF_pai=cpf_pai,
+                RG_pai=rg_pai,
+                Telefone_pai=telefone_pai,
+                Nome_mae=nome_mae,
+                Cpf_mae=cpf_mae,
+                Rg_mae=rg_mae,
+                Telefone_mae=telefone_mae,
+                CEP=cep,
+                Endereco=endereco,
+                Numero=numero,
+                Complemento=complemento,
+                Bairro=bairro,
+                Cidade=cidade,
+                Estado=estado
+            )
+            paciente.save()
+            
+            # Mensagem de sucesso
+            messages.success(request, "Paciente cadastrado com sucesso!")
+            return redirect('cadastrar_paciente')  # Redirecionar para evitar reenvio do formulário
+
+        except:
+            return render(request, 'frontend/erro_validacao.html')
+
         
-        return render(request, 'frontend/cadastrar_paciente.html')
     
 @has_role_decorator('administrador')
 @login_required(login_url="/")
@@ -397,6 +413,16 @@ def pagina_paciente(request, paciente_id):
     }
 
     return render(request, 'frontend/pagina_paciente.html', context)
+
+def delete_pdf(request, paciente_id, pdf_id):
+    context = {}
+    pdf = get_object_or_404(PDFUpload, id=pdf_id, paciente_id=paciente_id)
+    context['object'] = pdf
+    if request.method == "POST":
+        pdf.delete()
+        return redirect('pagina_paciente', paciente_id=paciente_id)
+    return render(request, 'frontend/confirmar_excluir_pdf.html', context)
+
 
 
 
