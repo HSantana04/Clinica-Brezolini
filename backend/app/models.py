@@ -158,3 +158,10 @@ class Financeiro(models.Model):
     def __str__(self):
         return f"{self.descricao}"
 
+class PDFUpload(models.Model):
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    pdf_file = models.FileField(upload_to='pdfs/')  # Armazena PDFs na pasta 'pdfs'
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.paciente.nome} - {self.pdf_file.name}"

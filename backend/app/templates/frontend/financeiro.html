@@ -195,7 +195,15 @@
                         <td>{{financeiro.valor}} R$</td>
                         <td>{{financeiro.tipo}}</td>
                         <td>{{financeiro.data_de_pagamento}}</td>
-                        <td>{{financeiro.status}}</td>
+                        <td>
+                          <form action="{% url 'atualizar_status' financeiro.id %}" method="post">
+                              {% csrf_token %}
+                              <select name="status" onchange="this.form.submit()">
+                                  <option value="Pendente" {% if financeiro.status == 'Pendente' %} selected {% endif %}>Pendente</option>
+                                  <option value="Pago" {% if financeiro.status == 'Pago' %} selected {% endif %}>Pago</option>
+                              </select>
+                          </form>
+                      </td>
                         
                         <td>
                           <a href="{% url 'deletar_financeiro' financeiro.id %}" class="btn btn-danger btn-sm">

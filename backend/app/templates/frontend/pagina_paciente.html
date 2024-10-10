@@ -322,9 +322,27 @@
   
   <div class="card">
     <div class="card-body">
-      
-aaa
-      
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {{ pdf_form.as_p }}  <!-- Formulário para o upload do PDF -->
+        <button type="submit">Salvar</button>
+    </form>
+    <ul>
+      {% for pdf in pdf_uploads %}
+          <li>
+              <a href="{{ pdf.pdf_file.url }}" target="_blank">{{ pdf.pdf_file.name }}</a>  <!-- Link para o arquivo PDF -->
+              <form action="#" method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm" title="Deletar">
+                      <i class="bi bi-trash-fill"></i>
+                  </button>
+              </form>
+          </li>
+      {% empty %}
+          <li>Nenhum arquivo PDF salvo.</li>
+      {% endfor %}
+  </ul>
     </div>
   </div>
  

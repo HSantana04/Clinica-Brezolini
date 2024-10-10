@@ -28,9 +28,9 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from app.models import EventMember, Event, Anotacao, Odontograma, Block, Financeiro
+from app.models import EventMember, Event, Anotacao, Odontograma, Block, Financeiro, PDFUpload
 from app.utils import Calendar
-from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, BlockForm
+from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, BlockForm, PDFUploadForm
 from django.db.models import Count
 from django.db.models.functions import TruncDay
 import base64
@@ -108,47 +108,57 @@ def index(request):
 @login_required(login_url="/")
 def financeiro(request):
     if request.method == "POST":
+        # Lógica para criar um novo registro financeiro
         descricao = request.POST.get('descricao')
-        valor = float(request.POST.get('valor'))  # Convertendo para float
+        valor = float(request.POST.get('valor'))
         tipo = request.POST.get('tipo')
-        data_de_pagamento=request.POST.get('data_pagamento')
+        data_de_pagamento = request.POST.get('data_pagamento')
 
-        # Criação do registro financeiro
         financeiro = Financeiro(
             descricao=descricao,
             valor=valor,
             tipo=tipo,
             data_de_pagamento=data_de_pagamento,
-            usuario=request.user  # Associando ao usuário logado
+            usuario=request.user
         )
-        financeiro.save()  # Salva o registro no banco de dados
+        financeiro.save()
+        return redirect('financeiro')
 
-        return redirect('financeiro')  # Redireciona para a mesma página após o POST
     else:
         usuario = request.user
         # Filtra os dados financeiros do usuário logado
-        dados_financeiros = Financeiro.objects.filter(usuario=usuario)
+        dados_financeiros = Financeiro.objects.filter(usuario=usuario).order_by('-data_de_pagamento')
 
-        # Somando ou subtraindo os valores conforme o tipo
+        # Calcula o saldo total apenas para transações pagas
         saldo_total = 0
         for item in dados_financeiros:
-            if item.tipo == 'Entrada':
-                saldo_total += item.valor
-            elif item.tipo == 'Saída':
-                saldo_total -= item.valor
+            if item.status == 'Pago':
+                if item.tipo == 'Entrada':
+                    saldo_total += item.valor
+                elif item.tipo == 'Saída':
+                    saldo_total -= item.valor
 
         return render(request, 'frontend/financeiro.html', {
             'financeiro': dados_financeiros,
             'usuario': usuario,
             'saldo_total': saldo_total,  # Passa o saldo total para o template
         })
-    
+
 def deletar_financeiro(request, item_id):
     item = get_object_or_404(Financeiro, id=item_id, usuario=request.user)
     if request.method == "POST":
         item.delete()
         return redirect('financeiro')
     return render(request, 'frontend/confirmar_excluir_transacao.html', {'item': item})
+
+def atualizar_status(request, item_id):
+    item = get_object_or_404(Financeiro, id=item_id, usuario=request.user)
+    if request.method == "POST":
+        novo_status = request.POST.get('status')
+        item.status = novo_status
+        item.save()
+        return redirect('financeiro')
+    return render(request, 'frontend/financeiro.html', {'financeiro': item})
 
 def editar_financeiro(request, item_id):
     item = get_object_or_404(Financeiro, id=item_id)
@@ -344,13 +354,20 @@ def pagina_paciente(request, paciente_id):
     paciente = get_object_or_404(Paciente, id=paciente_id)
     eventos = Event.objects.filter(paciente=paciente)
     anotacoes = Anotacao.objects.filter(paciente=paciente)
-
-    # Adiciona ou obtém a instância do odontograma
     odontograma, created = Odontograma.objects.get_or_create(paciente=paciente)
+
+    # Buscar os arquivos PDF associados ao paciente
+    pdf_uploads = PDFUpload.objects.filter(paciente=paciente)
+
+    # Inicialização dos formulários
+    form = AnotacaoForm()
+    dente_form = DenteForm(instance=odontograma)
+    pdf_form = PDFUploadForm()
 
     if request.method == 'POST':
         form = AnotacaoForm(request.POST)
         dente_form = DenteForm(request.POST, instance=odontograma)
+        pdf_form = PDFUploadForm(request.POST, request.FILES)
 
         if form.is_valid():
             anotacao = form.save(commit=False)
@@ -360,10 +377,12 @@ def pagina_paciente(request, paciente_id):
         if dente_form.is_valid():
             dente_form.save()
 
+        if pdf_form.is_valid():
+            pdf_upload = pdf_form.save(commit=False)
+            pdf_upload.paciente = paciente
+            pdf_upload.save()
+
         return redirect('pagina_paciente', paciente_id=paciente.id)
-    else:
-        form = AnotacaoForm()
-        dente_form = DenteForm(instance=odontograma)
 
     context = {
         "object": paciente,
@@ -372,10 +391,14 @@ def pagina_paciente(request, paciente_id):
         "form": form,
         "odontograma": odontograma,
         "dente": dente_form,
-        "paciente": paciente,  # Adicione a variável paciente explicitamente
+        "pdf_form": pdf_form,
+        "pdf_uploads": pdf_uploads,
+        "paciente":paciente,  # Adicionando os uploads de PDF ao contexto
     }
 
     return render(request, 'frontend/pagina_paciente.html', context)
+
+
 
 def salvar_desenho(request, paciente_id):
     if request.method == 'POST':

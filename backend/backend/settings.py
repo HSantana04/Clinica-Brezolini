@@ -124,6 +124,7 @@ USE_TZ = True
 STATIC_URL = 'app/static/'
 MEDIA_URL = 'img/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'img')
+PDF_UPLOAD_DIR = os.path.join(MEDIA_ROOT, 'pdfs')
 # Default primary key field type
 # https://docs.djangoproject.com/en/dev/ref/settings/#default-auto-field
 

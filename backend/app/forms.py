@@ -1,5 +1,5 @@
 from django.forms import ModelForm, DateInput
-from app.models import EventMember, Event, Paciente, Anotacao, Odontograma, Block
+from app.models import EventMember, Event, Paciente, Anotacao, Odontograma, Block, PDFUpload
 from django import forms
 
 
@@ -113,3 +113,8 @@ class BlockForm(forms.ModelForm):
     class Meta:
         model = Block
         fields = []
+
+class PDFUploadForm(forms.ModelForm):
+    class Meta:
+        model = PDFUpload
+        fields = ['pdf_file']
