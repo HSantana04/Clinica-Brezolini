@@ -177,58 +177,42 @@
                           <th scope="col">Descrição</th>
                           <th scope="col">Valor</th>
                           <th scope="col">Tipo</th>
+                          <th scope="col">Data de Vencimento</th>
+                          <th scope="col">Status</th>
                           <th scope="col">Ação</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <!-- As transações serão listadas aqui -->
-                        <tr>
-                          <td>1</td>
-                          <td>Consulta 1</td>
-                          <td>500</td>
-                          <td>Entrada</td>
-                          <td>
-                            <a href="#" class="btn btn-danger btn-sm">
-                                <i class="bi bi-trash-fill"></i>
-                            </a>
-                            <a href="#" class="btn btn-warning btn-sm">
-                              <i class="bi bi-pencil-fill"></i>
-                          </a>
-                           
-                        </td>
-                        </tr>
-                        <tr>
                         
-                        </tr>
-                          <td>2</td>
-                          <td>Consulta 2</td>
-                          <td>500</td>
-                          <td>Entrada</td>
-                          <td>
-                            <a href="#" class="btn btn-danger btn-sm">
-                                <i class="bi bi-trash-fill"></i>
-                            </a>
-                            <a href="#" class="btn btn-warning btn-sm">
-                              <i class="bi bi-pencil-fill"></i>
-                          </a>
-                           
-                        </td>
-                        </tr>
-                        <tr></tr>
-                          <td>3</td>
-                          <td>Despesa 1</td>
-                          <td>500</td>
-                          <td>Saida</td>
-                          <td>
-                            <a href="#" class="btn btn-danger btn-sm">
-                                <i class="bi bi-trash-fill"></i>
-                            </a>
-                            <a href="#" class="btn btn-warning btn-sm">
-                              <i class="bi bi-pencil-fill"></i>
-                          </a>
-                           
-                        </td>
-                        </tr>
+                        
+                     {% if financeiro %}
+                      {% for financeiro in financeiro %}
+                      <tr>
+                        
+                        
+                        <td>{{financeiro.id}}</td>
+                        <td>{{financeiro.descricao}}</td>
+                        <td>{{financeiro.valor}} R$</td>
+                        <td>{{financeiro.tipo}}</td>
+                        <td>{{financeiro.data_de_pagamento}}</td>
+                        <td>{{financeiro.status}}</td>
+                        
+                        <td>
+                          <a href="{% url 'deletar_financeiro' financeiro.id %}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash-fill"></i>
+                        </a>
+                        <!-- Botão para editar -->
+                        <a href="{% url 'editar_financeiro' financeiro.id %}" class="btn btn-warning btn-sm">
+                          <i class="bi bi-pencil-fill"></i>
+                      </a>
+                         
+                      </td>
+                      </tr>
+                      {% endfor %}
+                  {% else %}
+                      <td>Sem itens associados.</td>
+                  {% endif %}
+                       
                       </tbody>
                     </table>
       
@@ -249,7 +233,7 @@
                       <i class="bi bi-currency-dollar"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>500<span>R$</span></h6>
+                      <h6>{{saldo_total}}<span>R$</span></h6>
                       
                     </div>
                   </div>
@@ -261,24 +245,32 @@
               <div class="card-body">
                 <h5 class="card-title">Adicionar Transação</h5>
   
-                <form id="transactionForm">
+                <form method="POST" id="transactionForm">
+                  {% csrf_token %}
                   <div class="mb-3">
-                    <label for="description" class="form-label">Descrição</label>
-                    <input type="text" class="form-control" id="description" required>
+                      <label for="description" class="form-label">Descrição</label>
+                      <input type="text" class="form-control" id="description" name="descricao" required>
                   </div>
                   <div class="mb-3">
-                    <label for="value" class="form-label">Valor</label>
-                    <input type="number" class="form-control" id="value" required>
+                      <label for="value" class="form-label">Valor</label>
+                      <input type="number" class="form-control" id="value" name="valor" step="0.01" required>
                   </div>
                   <div class="mb-3">
-                    <label for="type" class="form-label">Tipo</label>
-                    <select class="form-select" id="type" required>
-                      <option value="Entrada">Entrada</option>
-                      <option value="Saída">Saída</option>
-                    </select>
+                      <label for="type" class="form-label">Tipo</label>
+                      <select class="form-select" id="type" name="tipo" required>
+                          <option value="Entrada">Entrada</option>
+                          <option value="Saída">Saída</option>
+                      </select>
                   </div>
+                  <div class="row mb-3">
+                    <label for="inputDate" class="form-label">Data de Vencimento 
+                    </label>
+                    <div>
+                      <input type="date" name="data_pagamento" class="form-control">
+                    </div>
+                  </div> 
                   <button type="submit" class="btn btn-primary">Adicionar</button>
-                </form>
+              </form>
               </div>
             </div>
           </div>

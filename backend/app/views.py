@@ -28,7 +28,7 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from app.models import EventMember, Event, Anotacao, Odontograma, Block
+from app.models import EventMember, Event, Anotacao, Odontograma, Block, Financeiro
 from app.utils import Calendar
 from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, BlockForm
 from django.db.models import Count
@@ -104,9 +104,72 @@ def index(request):
     
     return render(request, 'frontend/index.html', context)
 
+@has_role_decorator('administrador')
+@login_required(login_url="/")
 def financeiro(request):
-    return render(request, 'frontend/financeiro.html')
+    if request.method == "POST":
+        descricao = request.POST.get('descricao')
+        valor = float(request.POST.get('valor'))  # Convertendo para float
+        tipo = request.POST.get('tipo')
+        data_de_pagamento=request.POST.get('data_pagamento')
 
+        # Criação do registro financeiro
+        financeiro = Financeiro(
+            descricao=descricao,
+            valor=valor,
+            tipo=tipo,
+            data_de_pagamento=data_de_pagamento,
+            usuario=request.user  # Associando ao usuário logado
+        )
+        financeiro.save()  # Salva o registro no banco de dados
+
+        return redirect('financeiro')  # Redireciona para a mesma página após o POST
+    else:
+        usuario = request.user
+        # Filtra os dados financeiros do usuário logado
+        dados_financeiros = Financeiro.objects.filter(usuario=usuario)
+
+        # Somando ou subtraindo os valores conforme o tipo
+        saldo_total = 0
+        for item in dados_financeiros:
+            if item.tipo == 'Entrada':
+                saldo_total += item.valor
+            elif item.tipo == 'Saída':
+                saldo_total -= item.valor
+
+        return render(request, 'frontend/financeiro.html', {
+            'financeiro': dados_financeiros,
+            'usuario': usuario,
+            'saldo_total': saldo_total,  # Passa o saldo total para o template
+        })
+    
+def deletar_financeiro(request, item_id):
+    item = get_object_or_404(Financeiro, id=item_id, usuario=request.user)
+    if request.method == "POST":
+        item.delete()
+        return redirect('financeiro')
+    return render(request, 'frontend/confirmar_excluir_transacao.html', {'item': item})
+
+def editar_financeiro(request, item_id):
+    item = get_object_or_404(Financeiro, id=item_id)
+
+    if request.method == 'POST':
+        descricao = request.POST.get('descricao')
+        valor = request.POST.get('valor')
+        tipo = request.POST.get('tipo')
+        data_de_pagamento=request.POST.get('data_pagamento')
+
+        # Atualiza os campos do item
+        item.descricao = descricao
+        item.valor = valor
+        item.tipo = tipo
+        item.data_de_pagamento = data_de_pagamento
+        item.save()
+
+        # Redireciona para a página financeira após editar
+        return redirect('financeiro')
+    
+    return render(request, 'frontend/editar_financeiro.html', {'item': item})
 def login(request):
     if request.user.is_authenticated:
         # Se o usuário já estiver autenticado, redirecione para a página inicial
@@ -146,7 +209,7 @@ def cadastro(request):
         users = User.objects.all()
         return render(request, 'frontend/cadastro.html', {'users': users})
     else:
-        username = request.POST.get('username')
+        username = request.POST.get('u sername')
         email = request.POST.get('email')
         senha = request.POST.get('senha')
         grupo = request.POST.get('grupo')
@@ -263,6 +326,16 @@ def delete_paciente(request, paciente_id):
     return render(request, 'frontend/confirmar_excluir_paciente.html', context)
 
 @login_required(login_url="/")
+def delete_anotacao(request, paciente_id, anotacao_id):
+    context = {}
+    anotacao = get_object_or_404(Anotacao, id=anotacao_id, paciente_id=paciente_id)
+    context['object'] = anotacao
+    if request.method == "POST":
+        anotacao.delete()
+        return redirect('pagina_paciente', paciente_id=paciente_id)
+    return render(request, 'frontend/confirmar_excluir_anotacao.html', context)
+
+@login_required(login_url="/")
 def pagina_usuario(request):
     return render(request, 'frontend/users-profile.html')
 
@@ -326,9 +399,6 @@ def salvar_desenho(request, paciente_id):
         return JsonResponse({'success': False, 'error': 'Método inválido'}, status=400)
 
 @has_role_decorator('administrador')
-@login_required(login_url="/")
-def pagina_financeiro(request):
-    return render(request, 'frontend/pagina_paciente.html')
 
 @has_role_decorator('administrador')
 @login_required(login_url="/")

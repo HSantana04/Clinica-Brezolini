@@ -147,3 +147,14 @@ class Odontograma(models.Model):
 
     def __str__(self):
         return f"Odontograma de {self.paciente.nome}"
+    
+class Financeiro(models.Model):
+    descricao=models.CharField(max_length=200)
+    valor=models.DecimalField(max_digits=10, decimal_places=2)
+    tipo=models.CharField(max_length=8)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    data_de_pagamento=models.DateField(default=timezone.now)
+    status=models.CharField(max_length=20, default='Pendente')
+    def __str__(self):
+        return f"{self.descricao}"
+

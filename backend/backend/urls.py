@@ -33,10 +33,11 @@ urlpatterns = [
     path('cadastrar_paciente', views.cadastrar_paciente, name='cadastrar_paciente'),
     path("pagina_usuario", views.pagina_usuario, name='pagina_usuario'),
     path("pagina_paciente/<int:paciente_id>/", views.pagina_paciente, name='pagina_paciente'),
-    path("pagina_financeiro", views.pagina_financeiro, name='pagina_financeiro'),
     path('users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
     path('paciente/<int:paciente_id>/delete/', views.delete_paciente, name='delete_paciente'),
     path('paciente/<int:paciente_id>/update/', views.editar_paciente, name='update_paciente'),
+    path('financeiro/<int:item_id>/delete/', views.deletar_financeiro, name='deletar_financeiro'),
+    path('financeiro/<int:item_id>/editar/', views.editar_financeiro, name='editar_financeiro'),
     path("calenders/", views.CalendarView.as_view(), name="calendars"),
     path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
     path('next_week/<int:event_id>/', views.next_week, name='next_week'),
@@ -59,6 +60,7 @@ urlpatterns = [
         name="running_events",
     ),
     path('salvar_desenho/<int:paciente_id>/', views.salvar_desenho, name='salvar_desenho'),
-    path('financeiro', views.financeiro, name="financeiro")
+    path('financeiro', views.financeiro, name="financeiro"),
+    path('pagina_paciente/<int:paciente_id>/delete/<int:anotacao_id>/', views.delete_anotacao, name='delete_anotacao'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
