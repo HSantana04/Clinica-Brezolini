@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Dashboard - NiceAdmin Bootstrap Template</title>
+  <title>Clinica Brezolini</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
   <!-- Favicons -->
-  <link href="{% static "img/logo.png" %}" rel="icon">
+  <link type="image/png" href="{% static "img/logo2.PNG" %}" rel="icon">
   <link href="{% static "img/logo.png" %}" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
@@ -170,13 +170,14 @@
                   <div class="card-body">
                     <h5 class="card-title">Listagem de Transações</h5>
       
-                    <table class="table" id="transactionTable">
+                    <table class="table datatable" id="transactionTable">
                       <thead>
                         <tr>
                           <th scope="col">#</th>
                           <th scope="col">Descrição</th>
                           <th scope="col">Valor</th>
                           <th scope="col">Tipo</th>
+                          <th scope="col">Paciente</th>
                           <th scope="col">Data de Vencimento</th>
                           <th scope="col">Status</th>
                           <th scope="col">Ação</th>
@@ -194,9 +195,10 @@
                         <td>{{financeiro.descricao}}</td>
                         <td>{{financeiro.valor}} R$</td>
                         <td>{{financeiro.tipo}}</td>
+                        <td>{{financeiro.paciente}}</td>
                         <td>{{financeiro.data_de_pagamento}}</td>
                         <td>
-                          <form action="{% url 'atualizar_status' financeiro.id %}" method="post">
+                        <form action="{% url 'atualizar_status' financeiro.id %}" method="post">
                               {% csrf_token %}
                               <select name="status" onchange="this.form.submit()">
                                   <option value="Pendente" {% if financeiro.status == 'Pendente' %} selected {% endif %}>Pendente</option>
@@ -262,6 +264,15 @@
                   <div class="mb-3">
                       <label for="value" class="form-label">Valor</label>
                       <input type="number" class="form-control" id="value" name="valor" step="0.01" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="paciente" class="col-form-label">Paciente:</label>
+                    <select class="form-select" name="paciente" aria-label="Default select example">
+                        <option value="" selected>Selecione um paciente</option>
+                        {% for paciente in pacientes %}
+                            <option value="{{ paciente.id }}">{{ paciente.Nome }}</option>
+                        {% endfor %}
+                    </select>
                   </div>
                   <div class="mb-3">
                       <label for="type" class="form-label">Tipo</label>

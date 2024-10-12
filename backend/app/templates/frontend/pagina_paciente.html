@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static "style.css" %}">   
-      <title>Dashboard - NiceAdmin Bootstrap Template</title>
+      <title>Clinica Brezolini</title>
       <meta content="" name="description">
       <meta content="" name="keywords">
     
       <!-- Favicons -->
-  <link href="{% static "img/logo.png" %}" rel="icon">
+  <link type="image/png" href="{% static "img/logo2.PNG" %}" rel="icon">
   <link href="{% static "img/logo.png" %}" rel="apple-touch-icon">
     
       <!-- Google Fonts -->
       <link href="https://fonts.gstatic.com" rel="preconnect">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Vendor CSS Files -->
   <link href="{% static "vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
   <link href="{% static "vendor/bootstrap-icons/bootstrap-icons.css" %}" rel="stylesheet">
@@ -267,7 +267,75 @@
             <div class="row">
               <div>Contato: {{object.celular}} </div>
               
-          </div><hr>
+          </div>
+          <hr>
+          <div>
+            <h3 style="text-align: center;">Financeiro do Paciente</h3>
+            <table class="table">
+              <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Descrição</th>
+                    <th scope="col">Valor</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Paciente</th>
+                    <th scope="col">Data de Vencimento</th>
+                    <th scope="col">Status</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for transacao in transacoes %}
+                  <tr>
+                        
+                        
+                    <td>{{transacao.id}}</td>
+                    <td>{{transacao.descricao}}</td>
+                    <td>{{transacao.valor}} R$</td>
+                    <td>{{transacao.tipo}}</td>
+                    <td>{{transacao.paciente}}</td>
+                    <td>{{transacao.data_de_pagamento}}</td>
+                    <td>{{transacao.status}}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                      <td colspan="4">Nenhuma transação encontrada.</td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+          
+          <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-3" style="background-color: white;">
+                    <div class="card-header text-center">Total de Entradas</div>
+                    <div class="card-body text-center">
+                        <h5 class="display-6">R$ {{ total_entrada }}</h5>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-md-4">
+                <div class="card mb-3" style="background-color: white;">
+                    <div class="card-header text-center">Total de Saídas</div>
+                    <div class="card-body text-center">
+                        <h5 class="display-6">R$ {{ total_saida }}</h5>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-md-4">
+                <div class="card mb-3" style="background-color: white;">
+                    <div class="card-header text-center">Saldo Total</div>
+                    <div class="card-body text-center">
+                        <h5 class="display-6">R$ {{ saldo_total }}</h5>
+                    </div>
+                </div>
+            </div>
+        </div><br>*Para atualizar status ou editar transação, acessar pagina Financeiro<br>*Valores não pagos não serão contabilizados
+        
+          
+          </div>
+          <hr>
           <h3 style="text-align: center;">Consultas agendadas</h3>
           {% if eventos %}
           {% for evento in eventos %}
@@ -321,6 +389,65 @@
   </div>
   
   <button id="saveDrawing" class="btn btn-primary">Salvar Desenho</button>
+  <ul>
+    <li style="margin-top: 10px">
+      <i class="fas fa-check-circle" style="color: green;"></i> 
+      Paciente não precisa de tratamento: preencher em verde.
+  </li>
+  <li>
+      <i class="fas fa-times-circle" style="color: red;"></i> 
+      Paciente precisa de tratamento: contornar em vermelho.
+  </li>
+  <li>
+      <i class="fas fa-info-circle" style="color: blue;"></i> 
+      Tratamento já realizado: preencher em azul.
+  </li>
+  <li>
+      <i class="fas fa-ellipsis-h" style="color: blue;"></i> 
+      Diastema: dois riscos verticais em azul.
+  </li>
+  <li>
+      <i class="fas fa-exclamation-triangle" style="color: red;"></i> 
+      Restauração em excesso: ziguezague em vermelho.
+  </li>
+  <li>
+      <i class="fas fa-times" style="color: black;"></i> 
+      Dente extraído: preencher em preto.
+  </li>
+  <li>
+      <i class="fas fa-circle" style="color: red;"></i> 
+      Lesão de cárie ativa: semicírculo horizontal vermelho (se apresentar cavidade deve ser contínuo, se não apresentar deve ser tracejado).
+  </li>
+  <li>
+      <i class="fas fa-circle" style="color: green;"></i> 
+      Lesão de cárie inativa: semicírculo horizontal verde (se apresentar cavidade deve ser contínuo, se não apresentar deve ser tracejado).
+  </li>
+  <li>
+      <i class="fas fa-random" style="color: green;"></i> 
+      Desgaste dental: riscos diagonais em verde, caso não seja necessário restauração, ou em vermelho, caso seja necessário.
+  </li>
+  <li>
+      <i class="fas fa-dot-circle" style="color: green;"></i> 
+      Restauração: preencher um círculo em verde.
+  </li>
+  <li>
+      <i class="fas fa-circle" style="color: red;"></i> 
+      Restauração provisória: circular em vermelho.
+  </li>
+  <li>
+      <i class="fas fa-asterisk" style="color: green;"></i> 
+      Afecção mucogengival: asterisco em verde.
+  </li>
+  <li>
+      <i class="fas fa-arrow-up" style="color: black;"></i> 
+      Inclinação dental: setas em formato de U (todas indicadas para a mesma direção).
+  </li>
+  <li>
+      <i class="fas fa-arrow-up" style="color: blue;"></i> 
+      Extrusão dental: duas setas azuis na vertical com sentidos opostos.
+  </li>
+
+  </ul>
     <hr>
       </div>
   

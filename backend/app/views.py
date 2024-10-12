@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden,HttpResponseRedirect
+from django.db.models import Sum
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login as login_django
@@ -115,12 +116,15 @@ def financeiro(request):
         valor = float(request.POST.get('valor'))
         tipo = request.POST.get('tipo')
         data_de_pagamento = request.POST.get('data_pagamento')
+        paciente_id = request.POST.get('paciente')
+        paciente_instance = get_object_or_404(Paciente, id=paciente_id)
 
         financeiro = Financeiro(
             descricao=descricao,
             valor=valor,
             tipo=tipo,
             data_de_pagamento=data_de_pagamento,
+            paciente=paciente_instance,
             usuario=request.user
         )
         financeiro.save()
@@ -130,6 +134,7 @@ def financeiro(request):
         usuario = request.user
         # Filtra os dados financeiros do usuário logado
         dados_financeiros = Financeiro.objects.filter(usuario=usuario).order_by('-data_de_pagamento')
+        pacientes = Paciente.objects.all()
 
         # Calcula o saldo total apenas para transações pagas
         saldo_total = 0
@@ -143,9 +148,11 @@ def financeiro(request):
         return render(request, 'frontend/financeiro.html', {
             'financeiro': dados_financeiros,
             'usuario': usuario,
-            'saldo_total': saldo_total,  # Passa o saldo total para o template
+            'saldo_total': saldo_total, 
+            'pacientes': pacientes,  # Passa o saldo total para o template
         })
 
+@login_required(login_url="/")
 def deletar_financeiro(request, item_id):
     item = get_object_or_404(Financeiro, id=item_id, usuario=request.user)
     if request.method == "POST":
@@ -153,6 +160,7 @@ def deletar_financeiro(request, item_id):
         return redirect('financeiro')
     return render(request, 'frontend/confirmar_excluir_transacao.html', {'item': item})
 
+@login_required(login_url="/")
 def atualizar_status(request, item_id):
     item = get_object_or_404(Financeiro, id=item_id, usuario=request.user)
     if request.method == "POST":
@@ -162,6 +170,7 @@ def atualizar_status(request, item_id):
         return redirect('financeiro')
     return render(request, 'frontend/financeiro.html', {'financeiro': item})
 
+@login_required(login_url="/")
 def editar_financeiro(request, item_id):
     item = get_object_or_404(Financeiro, id=item_id)
 
@@ -170,12 +179,14 @@ def editar_financeiro(request, item_id):
         valor = request.POST.get('valor')
         tipo = request.POST.get('tipo')
         data_de_pagamento=request.POST.get('data_pagamento')
+        paciente = request.POST.get('paciente')
 
         # Atualiza os campos do item
         item.descricao = descricao
         item.valor = valor
         item.tipo = tipo
         item.data_de_pagamento = data_de_pagamento
+        item.paciente = paciente
         item.save()
 
         # Redireciona para a página financeira após editar
@@ -375,6 +386,14 @@ def pagina_paciente(request, paciente_id):
     # Buscar os arquivos PDF associados ao paciente
     pdf_uploads = PDFUpload.objects.filter(paciente=paciente)
 
+    # Buscar transações financeiras associadas ao paciente
+    transacoes = Financeiro.objects.filter(paciente=paciente)
+
+    # Calcular a soma total
+    total_entrada = transacoes.filter(tipo='Entrada', status='Pago').aggregate(Sum('valor'))['valor__sum'] or 0
+    total_saida = transacoes.filter(tipo='Saída', status='Pago').aggregate(Sum('valor'))['valor__sum'] or 0
+    saldo_total = total_entrada - total_saida
+
     # Inicialização dos formulários
     form = AnotacaoForm()
     dente_form = DenteForm(instance=odontograma)
@@ -409,11 +428,16 @@ def pagina_paciente(request, paciente_id):
         "dente": dente_form,
         "pdf_form": pdf_form,
         "pdf_uploads": pdf_uploads,
-        "paciente":paciente,  # Adicionando os uploads de PDF ao contexto
+        "transacoes": transacoes,
+        "total_entrada": total_entrada,
+        "total_saida": total_saida,
+        "saldo_total": saldo_total,
+        "paciente":paciente,
     }
 
     return render(request, 'frontend/pagina_paciente.html', context)
 
+@login_required(login_url="/")
 def delete_pdf(request, paciente_id, pdf_id):
     context = {}
     pdf = get_object_or_404(PDFUpload, id=pdf_id, paciente_id=paciente_id)
@@ -425,7 +449,7 @@ def delete_pdf(request, paciente_id, pdf_id):
 
 
 
-
+@login_required(login_url="/")
 def salvar_desenho(request, paciente_id):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -447,7 +471,7 @@ def salvar_desenho(request, paciente_id):
     else:
         return JsonResponse({'success': False, 'error': 'Método inválido'}, status=400)
 
-@has_role_decorator('administrador')
+
 
 @has_role_decorator('administrador')
 @login_required(login_url="/")
@@ -538,7 +562,7 @@ class CalendarView(LoginRequiredMixin, generic.ListView):
         return context
 
 
-@login_required(login_url="signup")
+@login_required(login_url="/")
 def create_event(request):
     if request.method == "POST":
         form = EventForm(request.POST)
@@ -617,7 +641,7 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
         context = {"form": forms, "events": event_list,
                    "events_month": events_month, "pacientes": pacientes}
         return render(request, self.template_name, context)
-
+    
     def post(self, request, *args, **kwargs):
         forms = self.form_class(request.POST)
         if forms.is_valid():
@@ -629,7 +653,7 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
         return render(request, self.template_name, context)
 
 
-
+@login_required(login_url="/")
 def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if request.method == 'POST':
@@ -638,6 +662,7 @@ def delete_event(request, event_id):
     else:
         return JsonResponse({'message': 'Erro!'}, status=400)
 
+@login_required(login_url="/")
 def next_week(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if request.method == 'POST':
@@ -650,6 +675,7 @@ def next_week(request, event_id):
     else:
         return JsonResponse({'message': 'Erro!'}, status=400)
 
+@login_required(login_url="/")
 def next_day(request, event_id):
 
     event = get_object_or_404(Event, id=event_id)
@@ -668,9 +694,10 @@ class AllEventsListView(ListView):
 
     template_name = "frontend/calendario.html"
     model = Event
-
+    @login_required(login_url="/")
     def get_queryset(self):
         return Event.objects.get_all_events(user=self.request.user)
+
 
 
 class RunningEventsListView(ListView):
@@ -678,10 +705,11 @@ class RunningEventsListView(ListView):
 
     template_name = "frontend/calendario.html"
     model = Event
-
+    @login_required(login_url="/")
     def get_queryset(self):
         return Event.objects.get_running_events(user=self.request.user)
 
+@login_required(login_url="/")
 def editar_paciente(request, paciente_id):
     paciente = get_object_or_404(Paciente, id=paciente_id)
 
