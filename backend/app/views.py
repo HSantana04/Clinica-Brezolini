@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseForbidden,HttpResponseRedirect
+from django.http import HttpResponse
 from django.db.models import Sum
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
@@ -7,7 +7,6 @@ from django.contrib.auth import authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
 from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
-from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from app.models import Paciente, Event, EventMember
@@ -20,7 +19,6 @@ from app.utils import Calendar
 from django.contrib import messages
 import calendar
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
 from django.views import generic
 from django.utils.safestring import mark_safe
 from datetime import timedelta, datetime, date
@@ -31,14 +29,12 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from app.models import EventMember, Event, Anotacao, Odontograma, Block, Financeiro, PDFUpload
+from app.models import EventMember, Event, Anotacao, Odontograma, Financeiro, PDFUpload
 from app.utils import Calendar
-from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, BlockForm, PDFUploadForm
+from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, PDFUploadForm
 from django.db.models import Count
 from django.db.models.functions import TruncDay
 import base64
-from io import BytesIO
-from PIL import Image
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
