@@ -271,6 +271,40 @@
           <hr>
           <div>
             <h3 style="text-align: center;">Financeiro do Paciente</h3>
+            
+            
+                <form method="POST" id="transactionForm">
+                  {% csrf_token %}
+                  <input type="hidden" name="paciente" value="{{ paciente.id }}">  <!-- Adiciona o paciente como um campo oculto -->
+                  
+                  <div class="mb-3">
+                    <label for="description" class="form-label">Descrição</label>
+                    <input type="text" class="form-control" id="description" name="descricao" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="value" class="form-label">Valor</label>
+                    <input type="number" class="form-control" id="value" name="valor" step="0.01" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="type" class="form-label">Tipo</label>
+                    <select class="form-select" id="type" name="tipo" required>
+                      <option value="Entrada">Entrada</option>
+                      <option value="Saída">Saída</option>
+                    </select>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="inputDate" class="form-label">Data de Vencimento</label>
+                    <div>
+                      <input type="date" name="data_pagamento" class="form-control">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="parcelas" class="form-label">Número de Parcelas</label>
+                    <input type="number" class="form-control" id="parcelas" name="parcelas" value="1" min="1" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+              
             <table class="table">
               <thead>
                   <tr>

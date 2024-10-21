@@ -155,6 +155,7 @@ class Financeiro(models.Model):
     tipo=models.CharField(max_length=8)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     data_de_pagamento=models.DateField(default=timezone.now)
+    parcelas = models.PositiveIntegerField(default=1)
     status=models.CharField(max_length=20, default='Pendente')
     def __str__(self):
         return f"{self.descricao}"

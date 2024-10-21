@@ -22,7 +22,6 @@ from django.shortcuts import render, redirect
 from django.views import generic
 from django.utils.safestring import mark_safe
 from datetime import timedelta, datetime, date
-import calendar
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
@@ -113,17 +112,26 @@ def financeiro(request):
         tipo = request.POST.get('tipo')
         data_de_pagamento = request.POST.get('data_pagamento')
         paciente_id = request.POST.get('paciente')
+        parcelas = int(request.POST.get('parcelas', 1))  # Obtém o número de parcelas ou usa 1 por padrão
+
         paciente_instance = get_object_or_404(Paciente, id=paciente_id)
 
-        financeiro = Financeiro(
-            descricao=descricao,
-            valor=valor,
-            tipo=tipo,
-            data_de_pagamento=data_de_pagamento,
-            paciente=paciente_instance,
-            usuario=request.user
-        )
-        financeiro.save()
+        # Calcula o valor de cada parcela
+        valor_parcela = valor / parcelas
+
+        # Cria as transações correspondentes
+        for i in range(parcelas):
+            financeiro = Financeiro(
+                descricao=descricao,
+                valor=valor_parcela,
+                tipo=tipo,
+                data_de_pagamento=data_de_pagamento,
+                paciente=paciente_instance,
+                usuario=request.user,
+                status='Pendente'  # Defina o status conforme necessário
+            )
+            financeiro.save()
+
         return redirect('financeiro')
 
     else:
