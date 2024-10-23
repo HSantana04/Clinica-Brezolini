@@ -486,6 +486,22 @@ def pagina_paciente(request, paciente_id):
     return render(request, 'frontend/pagina_paciente.html', context)
 
 @login_required(login_url="/")
+def atualizar_status_paciente(request, item_id, paciente_id):
+    # Obtém a instância do item Financeiro e do paciente
+    item = get_object_or_404(Financeiro, id=item_id, usuario=request.user)
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+
+    if request.method == "POST":
+        novo_status = request.POST.get('status')
+        item.status = novo_status
+        item.save()
+
+        # Redireciona para a página do paciente
+        return redirect('pagina_paciente', paciente_id=paciente.id)
+
+    return render(request, 'frontend/financeiro.html', {'financeiro': item})
+
+@login_required(login_url="/")
 def delete_pdf(request, paciente_id, pdf_id):
     context = {}
     pdf = get_object_or_404(PDFUpload, id=pdf_id, paciente_id=paciente_id)

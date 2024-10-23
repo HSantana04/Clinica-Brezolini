@@ -34,6 +34,7 @@ urlpatterns = [
     path("pagina_usuario", views.pagina_usuario, name='pagina_usuario'),
     path("pagina_paciente/<int:paciente_id>/", views.pagina_paciente, name='pagina_paciente'),
     #path('deletar_pdf/<int:pdf_id>/', views.deletar_pdf, name='deletar_pdf'),
+    path('atualizar-status/<int:item_id>/<int:paciente_id>/', views.atualizar_status_paciente, name='atualizar_status_paciente'),
     path('users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
     path('paciente/<int:paciente_id>/delete/', views.delete_paciente, name='delete_paciente'),
     path('paciente/<int:paciente_id>/update/', views.editar_paciente, name='update_paciente'),

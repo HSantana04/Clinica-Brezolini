@@ -333,13 +333,13 @@
                     <td>{{transacao.tipo}}</td>
                     <td>{{transacao.data_de_cobranca}}</td>
                     <td>
-                      <form action="{% url 'atualizar_status' transacao.id %}" method="post">
-                            {% csrf_token %}
-                            <select name="status" onchange="this.form.submit()">
-                                <option value="Pendente" {% if transacao.status == 'Pendente' %} selected {% endif %}>Pendente</option>
-                                <option value="Pago" {% if transacao.status == 'Pago' %} selected {% endif %}>Pago</option>
-                            </select>
-                        </form>
+                      <form action="{% url 'atualizar_status_paciente' transacao.id paciente.id %}" method="post">
+                        {% csrf_token %}
+                        <select name="status" onchange="this.form.submit()">
+                            <option value="Pendente" {% if transacao.status == 'Pendente' %} selected {% endif %}>Pendente</option>
+                            <option value="Pago" {% if transacao.status == 'Pago' %} selected {% endif %}>Pago</option>
+                        </select>
+                    </form>
                     </td>
                     <td>
                       <a href="{% url 'deletar_financeiro' transacao.id %}" class="btn btn-danger btn-sm">
