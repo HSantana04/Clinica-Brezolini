@@ -4,6 +4,8 @@ from django.db.models import Sum
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login as login_django
+from dateutil.relativedelta import relativedelta
+from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
@@ -106,38 +108,47 @@ def index(request):
 @login_required(login_url="/")
 def financeiro(request):
     if request.method == "POST":
-        # Lógica para criar um novo registro financeiro
+        # Obtém dados do formulário
         descricao = request.POST.get('descricao')
         valor = float(request.POST.get('valor'))
         tipo = request.POST.get('tipo')
-        data_de_pagamento = request.POST.get('data_pagamento')
+       
+        data_de_cobranca = request.POST.get('data_de_cobranca')
         paciente_id = request.POST.get('paciente')
-        parcelas = int(request.POST.get('parcelas', 1))  # Obtém o número de parcelas ou usa 1 por padrão
+        parcelas = int(request.POST.get('parcelas', 1))
 
+        # Obtém a instância do paciente
         paciente_instance = get_object_or_404(Paciente, id=paciente_id)
+
+        # Converte a data de cobrança para um objeto datetime
+        data_cobranca = datetime.strptime(data_de_cobranca, "%Y-%m-%d")
 
         # Calcula o valor de cada parcela
         valor_parcela = valor / parcelas
 
-        # Cria as transações correspondentes
-        for i in range(parcelas):
+        # Cria transações para cada parcela, com a data de cobrança avançando a cada mês
+        for i in range(1, parcelas + 1):
             financeiro = Financeiro(
                 descricao=descricao,
                 valor=valor_parcela,
                 tipo=tipo,
-                data_de_pagamento=data_de_pagamento,
+                data_de_cobranca=data_cobranca,  # Define a data ajustada
                 paciente=paciente_instance,
                 usuario=request.user,
-                status='Pendente'  # Defina o status conforme necessário
+                status='Pendente',
+                numero_parcela=i
             )
             financeiro.save()
+
+            # Avança a data de cobrança em 1 mês
+            data_cobranca += relativedelta(months=1)
 
         return redirect('financeiro')
 
     else:
         usuario = request.user
         # Filtra os dados financeiros do usuário logado
-        dados_financeiros = Financeiro.objects.filter(usuario=usuario).order_by('-data_de_pagamento')
+        dados_financeiros = Financeiro.objects.filter(usuario=usuario).order_by('-data_de_cobranca')
         pacientes = Paciente.objects.all()
 
         # Calcula o saldo total apenas para transações pagas
@@ -182,14 +193,14 @@ def editar_financeiro(request, item_id):
         descricao = request.POST.get('descricao')
         valor = request.POST.get('valor')
         tipo = request.POST.get('tipo')
-        data_de_pagamento=request.POST.get('data_pagamento')
+        data_de_cobranca=request.POST.get('data_pagamento')
         paciente = request.POST.get('paciente')
 
         # Atualiza os campos do item
         item.descricao = descricao
         item.valor = valor
         item.tipo = tipo
-        item.data_de_pagamento = data_de_pagamento
+        item.data_de_cobranca = data_de_cobranca
         item.paciente = paciente
         item.save()
 
@@ -407,6 +418,39 @@ def pagina_paciente(request, paciente_id):
         form = AnotacaoForm(request.POST)
         dente_form = DenteForm(request.POST, instance=odontograma)
         pdf_form = PDFUploadForm(request.POST, request.FILES)
+        descricao = request.POST.get('descricao')
+        valor = float(request.POST.get('valor'))
+        tipo = request.POST.get('tipo')
+        data_de_cobranca = request.POST.get('data_de_cobranca')
+        paciente_id = request.POST.get('paciente')
+        parcelas = int(request.POST.get('parcelas', 1))
+
+        # Obtém a instância do paciente
+        paciente_instance = get_object_or_404(Paciente, id=paciente_id)
+
+        # Converte a data de cobrança para um objeto datetime
+        data_cobranca = datetime.strptime(data_de_cobranca, "%Y-%m-%d")
+
+        # Calcula o valor de cada parcela
+        valor_parcela = valor / parcelas
+
+        # Cria transações para cada parcela
+        for i in range(1, parcelas + 1):
+            financeiro = Financeiro(
+                descricao=descricao,
+                valor=valor_parcela,
+                tipo=tipo,
+                data_de_cobranca=data_cobranca,  # Define a data ajustada
+                paciente=paciente_instance,
+                usuario=request.user,
+                status='Pendente',
+                numero_parcela=i,  # Número da parcela
+                parcelas=parcelas  # Quantidade total de parcelas
+            )
+            financeiro.save()
+
+            # Avança a data de cobrança em 1 mês
+            data_cobranca += relativedelta(months=1)
 
         if form.is_valid():
             anotacao = form.save(commit=False)

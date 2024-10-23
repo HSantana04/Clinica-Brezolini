@@ -293,14 +293,14 @@
                     </select>
                   </div>
                   <div class="row mb-3">
-                    <label for="inputDate" class="form-label">Data de Vencimento</label>
+                    <label for="inputDate" class="form-label">Data de Cobrança (Primeira Parcela):</label>
                     <div>
-                      <input type="date" name="data_pagamento" class="form-control">
+                      <input type="date" name="data_de_cobranca" class="form-control">
                     </div>
                   </div>
                   <div class="mb-3">
                     <label for="parcelas" class="form-label">Número de Parcelas</label>
-                    <input type="number" class="form-control" id="parcelas" name="parcelas" value="1" min="1" required>
+                    <input type="number" class="form-control" id="parcelas" name="parcelas" required>
                   </div>
                   <button type="submit" class="btn btn-primary">Adicionar</button>
                 </form>
@@ -311,10 +311,13 @@
                     <th scope="col">#</th>
                     <th scope="col">Descrição</th>
                     <th scope="col">Valor</th>
+                    <th scope="col">Numero de Parcelas</th>
+                    <th scope="col">Numero dessa parcela</th>
                     <th scope="col">Tipo</th>
-                    <th scope="col">Paciente</th>
-                    <th scope="col">Data de Vencimento</th>
+                    <th scope="col">Data de Cobrança</th>
                     <th scope="col">Status</th>
+                    <th scope="col">Ação</th>
+
                   </tr>
               </thead>
               <tbody>
@@ -325,10 +328,29 @@
                     <td>{{transacao.id}}</td>
                     <td>{{transacao.descricao}}</td>
                     <td>{{transacao.valor}} R$</td>
+                    <td>{{transacao.parcelas}}</td>
+                    <td>{{transacao.numero_parcela}}</td>
                     <td>{{transacao.tipo}}</td>
-                    <td>{{transacao.paciente}}</td>
-                    <td>{{transacao.data_de_pagamento}}</td>
-                    <td>{{transacao.status}}</td>
+                    <td>{{transacao.data_de_cobranca}}</td>
+                    <td>
+                      <form action="{% url 'atualizar_status' transacao.id %}" method="post">
+                            {% csrf_token %}
+                            <select name="status" onchange="this.form.submit()">
+                                <option value="Pendente" {% if transacao.status == 'Pendente' %} selected {% endif %}>Pendente</option>
+                                <option value="Pago" {% if transacao.status == 'Pago' %} selected {% endif %}>Pago</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                      <a href="{% url 'deletar_financeiro' transacao.id %}" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash-fill"></i>
+                    </a>
+                    <!-- Botão para editar -->
+                    <a href="{% url 'editar_financeiro' transacao.id %}" class="btn btn-warning btn-sm">
+                      <i class="bi bi-pencil-fill"></i>
+                  </a>
+                     
+                  </td>
                   </tr>
                   {% empty %}
                   <tr>
@@ -365,7 +387,7 @@
                     </div>
                 </div>
             </div>
-        </div><br>*Para atualizar status ou editar transação, acessar pagina Financeiro<br>*Valores não pagos não serão contabilizados
+        </div><br>*Valores não pagos não serão contabilizados
         
           
           </div>

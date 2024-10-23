@@ -176,9 +176,10 @@
                           <th scope="col">#</th>
                           <th scope="col">Descrição</th>
                           <th scope="col">Valor</th>
+                          <th scope="col">Parcelas</th>
                           <th scope="col">Tipo</th>
                           <th scope="col">Paciente</th>
-                          <th scope="col">Data de Vencimento</th>
+                          <th scope="col">Data de Cobrança</th>
                           <th scope="col">Status</th>
                           <th scope="col">Ação</th>
                         </tr>
@@ -194,9 +195,10 @@
                         <td>{{financeiro.id}}</td>
                         <td>{{financeiro.descricao}}</td>
                         <td>{{financeiro.valor}} R$</td>
+                        <td>{{financeiro.parcelas}}</td>
                         <td>{{financeiro.tipo}}</td>
                         <td>{{financeiro.paciente}}</td>
-                        <td>{{financeiro.data_de_pagamento}}</td>
+                        <td>{{financeiro.data_de_cobranca}}</td>
                         <td>
                         <form action="{% url 'atualizar_status' financeiro.id %}" method="post">
                               {% csrf_token %}
@@ -282,14 +284,14 @@
                       </select>
                     </div>
                     <div class="row mb-3">
-                      <label for="inputDate" class="form-label">Data de Vencimento</label>
+                      <label for="inputDate" class="form-label">Data de Cobrança (Primeira Parcela):</label>
                       <div>
-                        <input type="date" name="data_pagamento" class="form-control">
+                        <input type="date" name="data_de_cobranca" class="form-control">
                       </div>
                     </div>
                     <div class="mb-3">
                       <label for="parcelas" class="form-label">Número de Parcelas</label>
-                      <input type="number" class="form-control" id="parcelas" name="parcelas" value="1" min="1" required>
+                      <input type="number" class="form-control" id="parcelas" name="parcelas" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Adicionar</button>
                   </form>

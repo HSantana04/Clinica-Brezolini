@@ -197,7 +197,7 @@
     <div class="row mb-3">
         <label for="inputDate" class="form-label">Data de Vencimento</label>
         <div>
-            <input type="date" name="data_pagamento" class="form-control" value="{{ item.data_de_pagamento|date:"Y-m-d" }}">
+            <input type="date" name="data_pagamento" class="form-control" value="{{ item.data_de_cobranca|date:"Y-m-d" }}">
         </div>
     </div> 
                 <button type="submit" class="btn btn-primary">Salvar</button>
