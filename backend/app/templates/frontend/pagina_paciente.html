@@ -407,12 +407,15 @@
       {% endif %}
           </div><hr>
           <h3 style="text-align: center;">Adicionar Anotações</h3>
-    <form method="post" style="margin-left: 1%;">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button style="margin-left: 1%" class="btn btn-primary" type="submit">Salvar Anotação</button>
+          <form method="post" style="margin-left: 1%;">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <!-- Campo oculto para o ID do paciente -->
+            <input type="hidden" name="paciente" value="{{ paciente.id }}">
         
-    </form><hr>
+            <button style="margin-left: 1%" class="btn btn-primary" type="submit">Salvar Anotação</button>
+        </form><hr>
           <h3 style="text-align: center;">Anotações do paciente</h3>
     <ul>
         {% for anotacao in anotacoes %}

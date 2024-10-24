@@ -1,8 +1,16 @@
 from django.forms import ModelForm, DateInput
-from app.models import EventMember, Event, Paciente, Anotacao, Odontograma, Block, PDFUpload
+from app.models import EventMember, Event, Paciente, Anotacao, Odontograma, Block, PDFUpload, Financeiro
 from django import forms
 
 
+class FinanceiroForm(forms.ModelForm):
+    class Meta:
+        model = Financeiro
+        fields = ['descricao', 'paciente', 'valor', 'tipo', 'data_de_cobranca', 'parcelas']
+        widgets = {
+            'data_de_cobranca': forms.DateInput(attrs={'type': 'date'}),
+        }
+        
 class EventForm(ModelForm):
     class Meta:
         model = Event

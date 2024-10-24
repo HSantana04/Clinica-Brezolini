@@ -32,7 +32,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from app.models import EventMember, Event, Anotacao, Odontograma, Financeiro, PDFUpload
 from app.utils import Calendar
-from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, PDFUploadForm
+from app.forms import EventForm, AddMemberForm, PacienteForm, AnotacaoForm, DenteForm, PDFUploadForm, FinanceiroForm
 from django.db.models import Count
 from django.db.models.functions import TruncDay
 import base64
@@ -110,7 +110,7 @@ def financeiro(request):
     if request.method == "POST":
         # Obtém dados do formulário
         descricao = request.POST.get('descricao')
-        valor = float(request.POST.get('valor'))
+        valor = request.POST.get('valor')
         tipo = request.POST.get('tipo')
        
         data_de_cobranca = request.POST.get('data_de_cobranca')
@@ -396,93 +396,87 @@ def pagina_paciente(request, paciente_id):
     paciente = get_object_or_404(Paciente, id=paciente_id)
     eventos = Event.objects.filter(paciente=paciente)
     anotacoes = Anotacao.objects.filter(paciente=paciente)
-    odontograma, created = Odontograma.objects.get_or_create(paciente=paciente)
-
-    # Buscar os arquivos PDF associados ao paciente
+    odontograma, _ = Odontograma.objects.get_or_create(paciente=paciente)
     pdf_uploads = PDFUpload.objects.filter(paciente=paciente)
-
-    # Buscar transações financeiras associadas ao paciente
     transacoes = Financeiro.objects.filter(paciente=paciente)
 
-    # Calcular a soma total
+    # Cálculo do saldo financeiro
     total_entrada = transacoes.filter(tipo='Entrada', status='Pago').aggregate(Sum('valor'))['valor__sum'] or 0
     total_saida = transacoes.filter(tipo='Saída', status='Pago').aggregate(Sum('valor'))['valor__sum'] or 0
     saldo_total = total_entrada - total_saida
 
-    # Inicialização dos formulários
+    # Inicializa os formulários
     form = AnotacaoForm()
     dente_form = DenteForm(instance=odontograma)
     pdf_form = PDFUploadForm()
+    financeiro_form = FinanceiroForm(initial={'paciente': paciente})
 
     if request.method == 'POST':
-        form = AnotacaoForm(request.POST)
-        dente_form = DenteForm(request.POST, instance=odontograma)
-        pdf_form = PDFUploadForm(request.POST, request.FILES)
-        descricao = request.POST.get('descricao')
-        valor = float(request.POST.get('valor'))
-        tipo = request.POST.get('tipo')
-        data_de_cobranca = request.POST.get('data_de_cobranca')
-        paciente_id = request.POST.get('paciente')
-        parcelas = int(request.POST.get('parcelas', 1))
+        if 'descricao' in request.POST:  # Identifica se é o formulário financeiro
+            financeiro_form = FinanceiroForm(request.POST)
+            if financeiro_form.is_valid():
+                financeiro_instance = financeiro_form.save(commit=False)
+                financeiro_instance.usuario = request.user
 
-        # Obtém a instância do paciente
-        paciente_instance = get_object_or_404(Paciente, id=paciente_id)
+                # Criação de múltiplas parcelas
+                parcelas = financeiro_form.cleaned_data['parcelas']
+                valor_total = financeiro_form.cleaned_data['valor']
+                valor_parcela = valor_total / parcelas
+                data_cobranca = financeiro_form.cleaned_data['data_de_cobranca']
 
-        # Converte a data de cobrança para um objeto datetime
-        data_cobranca = datetime.strptime(data_de_cobranca, "%Y-%m-%d")
+                for i in range(1, parcelas + 1):
+                    Financeiro.objects.create(
+                        descricao=financeiro_instance.descricao,
+                        paciente=financeiro_instance.paciente,
+                        valor=valor_parcela,
+                        tipo=financeiro_instance.tipo,
+                        usuario=financeiro_instance.usuario,
+                        data_de_cobranca=data_cobranca,
+                        parcelas=parcelas,
+                        numero_parcela=i,
+                        status='Pendente',
+                    )
+                    data_cobranca += relativedelta(months=1)
 
-        # Calcula o valor de cada parcela
-        valor_parcela = valor / parcelas
+                messages.success(request, "Transação financeira adicionada com sucesso.")
+                return redirect('pagina_paciente', paciente_id=paciente.id)
 
-        # Cria transações para cada parcela
-        for i in range(1, parcelas + 1):
-            financeiro = Financeiro(
-                descricao=descricao,
-                valor=valor_parcela,
-                tipo=tipo,
-                data_de_cobranca=data_cobranca,  # Define a data ajustada
-                paciente=paciente_instance,
-                usuario=request.user,
-                status='Pendente',
-                numero_parcela=i,  # Número da parcela
-                parcelas=parcelas  # Quantidade total de parcelas
-            )
-            financeiro.save()
+        else:
+            # Lógica para outros formulários
+            form = AnotacaoForm(request.POST)
+            dente_form = DenteForm(request.POST, instance=odontograma)
+            pdf_form = PDFUploadForm(request.POST, request.FILES)
 
-            # Avança a data de cobrança em 1 mês
-            data_cobranca += relativedelta(months=1)
+            if form.is_valid():
+                anotacao = form.save(commit=False)
+                anotacao.paciente = paciente
+                anotacao.save()
 
-        if form.is_valid():
-            anotacao = form.save(commit=False)
-            anotacao.paciente = paciente
-            anotacao.save()
+            if dente_form.is_valid():
+                dente_form.save()
 
-        if dente_form.is_valid():
-            dente_form.save()
+            if pdf_form.is_valid():
+                pdf_upload = pdf_form.save(commit=False)
+                pdf_upload.paciente = paciente
+                pdf_upload.save()
 
-        if pdf_form.is_valid():
-            pdf_upload = pdf_form.save(commit=False)
-            pdf_upload.paciente = paciente
-            pdf_upload.save()
-
-        return redirect('pagina_paciente', paciente_id=paciente.id)
+            return redirect('pagina_paciente', paciente_id=paciente.id)
 
     context = {
-        "object": paciente,
-        "eventos": eventos,
-        "anotacoes": anotacoes,
-        "form": form,
-        "odontograma": odontograma,
-        "dente": dente_form,
-        "pdf_form": pdf_form,
-        "pdf_uploads": pdf_uploads,
-        "transacoes": transacoes,
-        "total_entrada": total_entrada,
-        "total_saida": total_saida,
-        "saldo_total": saldo_total,
-        "paciente":paciente,
-    }
-
+    "object": paciente,
+    "eventos": eventos,
+    "anotacoes": anotacoes,
+    "form": form,
+    "odontograma": odontograma,
+    "dente": dente_form,
+    "pdf_form": pdf_form,
+    "pdf_uploads": pdf_uploads,
+    "transacoes": transacoes,
+    "total_entrada": total_entrada,
+    "total_saida": total_saida,
+    "saldo_total": saldo_total,
+    "paciente": paciente,  # Certifique-se de que esta linha está presente
+}
     return render(request, 'frontend/pagina_paciente.html', context)
 
 @login_required(login_url="/")
