@@ -248,7 +248,7 @@ def cadastro(request):
         users = User.objects.all()
         return render(request, 'frontend/cadastro.html', {'users': users})
     else:
-        username = request.POST.get('u sername')
+        username = request.POST.get('username')
         email = request.POST.get('email')
         senha = request.POST.get('senha')
         grupo = request.POST.get('grupo')
