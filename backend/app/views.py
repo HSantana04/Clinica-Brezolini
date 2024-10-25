@@ -4,6 +4,7 @@ from django.db.models import Sum
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login as login_django
+from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
@@ -148,7 +149,7 @@ def financeiro(request):
     else:
         usuario = request.user
         # Filtra os dados financeiros do usuário logado
-        dados_financeiros = Financeiro.objects.filter(usuario=usuario).order_by('-data_de_cobranca')
+        dados_financeiros = Financeiro.objects.filter().order_by('-data_de_cobranca')
         pacientes = Paciente.objects.all()
 
         # Calcula o saldo total apenas para transações pagas
@@ -560,24 +561,38 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
         forms = self.form_class()
-        events = Event.objects.get_all_events(user=request.user)
-        events_month = Event.objects.get_running_events(user=request.user)
-        pacientes = Paciente.objects.all()
-        event_list = []
-        # start: '2020-09-16T16:00:00'
-        for event in events:
-            event_list.append(
-                {   "id": event.id,
-                    "title": event.title,
-                    "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "description": event.description,
-                    
-                }
-            )
         
-        context = {"form": forms, "events": event_list,
-                   "events_month": events_month, "pacientes": pacientes}
+        # Todos os eventos do usuário
+        events = Event.objects.get_all_events(user=request.user)
+        
+        # Eventos futuros e do mês atual
+        current_date = now()
+        events_month = Event.objects.filter(
+            user=request.user,
+            start_time__year=current_date.year,
+            start_time__month=current_date.month,
+            start_time__gte=current_date
+        ).order_by('start_time')
+
+        # Lista de eventos formatada para uso em um calendário ou exibição JSON-like
+        event_list = [
+            {
+                "id": event.id,
+                "title": event.title,
+                "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "description": event.description,
+            }
+            for event in events
+        ]
+
+        pacientes = Paciente.objects.all()
+        context = {
+            "form": forms,
+            "events": event_list,
+            "events_month": events_month,
+            "pacientes": pacientes,
+        }
         return render(request, self.template_name, context)
 
 @login_required(login_url="/")
@@ -681,23 +696,40 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
         forms = self.form_class()
+
+        # Todos os eventos
         events = Event.objects.all()
-        events_month = Event.objects.all()
-        pacientes=Paciente.objects.all()
-        event_list = []
-        # start: '2020-09-16T16:00:00'
-        for event in events:
-            event_list.append(
-                {   "id": event.id,
-                    "title": event.title,
-                    "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "description": event.description,
-                }
-            )
-        
-        context = {"form": forms, "events": event_list,
-                   "events_month": events_month, "pacientes": pacientes}
+
+        # Eventos futuros do mês atual
+        current_date = now()
+        events_month = Event.objects.filter(
+            start_time__year=current_date.year,
+            start_time__month=current_date.month,
+            start_time__gte=current_date
+        ).order_by('start_time')
+
+        # Preparação da lista de eventos para uso no calendário
+        event_list = [
+            {
+                "id": event.id,
+                "title": event.title,
+                "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "description": event.description,
+            }
+            for event in events
+        ]
+
+        pacientes = Paciente.objects.all()
+
+        # Contexto para o template
+        context = {
+            "form": forms,
+            "events": event_list,
+            "events_month": events_month,
+            "pacientes": pacientes,
+        }
+
         return render(request, self.template_name, context)
     
     def post(self, request, *args, **kwargs):

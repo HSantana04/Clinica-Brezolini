@@ -332,20 +332,20 @@
           <div class="col-md-12">
               <div class="tile row">
                   <div class="col-md-3">
-                      <div id="external-events">
-                          <h4 class="mb-4">Proximas consultas agendadas</h4>
-                          {% for event in events_month %}
-                            <div class="fc-event">
-                                <h3>{{ event.title }}</h3>
-                                <p>{{ event.description }}</p>
-                                <p>{{event.id}}</p>
-                                <p>Das: {{ event.start_time }}</p>
-                                <p>As: {{ event.end_time }}</p>
-                            </div>
-                          {% empty %}
-                            <p>Não há consultas agendadas</p>
-                          {% endfor %}
-                      </div>
+                    <div id="external-events">
+                      <h4 class="mb-4">Próximas consultas agendadas</h4>
+                      {% for event in events_month %}
+                          <div class="fc-event">
+                              <h3>{{ event.title }}</h3>
+                              <p>{{ event.description }}</p>
+                              <p>ID: {{ event.id }}</p>
+                              <p>Das: {{ event.start_time|date:"d/m/Y H:i" }}</p>
+                              <p>Até: {{ event.end_time|date:"d/m/Y H:i" }}</p>
+                          </div>
+                      {% empty %}
+                          <p>Não há consultas agendadas</p>
+                      {% endfor %}
+                  </div>
                   </div>
                   <div class="col-md-9">
                       <div id="calendar"></div>

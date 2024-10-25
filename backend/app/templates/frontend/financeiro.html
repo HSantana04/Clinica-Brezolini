@@ -166,10 +166,11 @@
     <section class="section dashboard">
         <div class="row">
             <div class="col-lg-8">
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title">Listagem de Transações</h5>
-      
+              <div class="card" style="max-height: 500px; overflow: hidden;">
+                <div class="card-body">
+                  <h5 class="card-title">Listagem de Transações</h5>
+              
+                  <div style="overflow-y: auto; max-height: 400px;">
                     <table class="table datatable" id="transactionTable">
                       <thead>
                         <tr>
@@ -185,51 +186,45 @@
                         </tr>
                       </thead>
                       <tbody>
-                        
-                        
-                     {% if financeiro %}
-                      {% for financeiro in financeiro %}
-                      <tr>
-                        
-                        
-                        <td>{{financeiro.id}}</td>
-                        <td>{{financeiro.descricao}}</td>
-                        <td>{{financeiro.valor}} R$</td>
-                        <td>{{financeiro.parcelas}}</td>
-                        <td>{{financeiro.tipo}}</td>
-                        <td>{{financeiro.paciente}}</td>
-                        <td>{{financeiro.data_de_cobranca}}</td>
-                        <td>
-                        <form action="{% url 'atualizar_status' financeiro.id %}" method="post">
-                              {% csrf_token %}
-                              <select name="status" onchange="this.form.submit()">
-                                  <option value="Pendente" {% if financeiro.status == 'Pendente' %} selected {% endif %}>Pendente</option>
-                                  <option value="Pago" {% if financeiro.status == 'Pago' %} selected {% endif %}>Pago</option>
-                              </select>
-                          </form>
-                      </td>
-                        
-                        <td>
-                          <a href="{% url 'deletar_financeiro' financeiro.id %}" class="btn btn-danger btn-sm">
-                            <i class="bi bi-trash-fill"></i>
-                        </a>
-                        <!-- Botão para editar -->
-                        <a href="{% url 'editar_financeiro' financeiro.id %}" class="btn btn-warning btn-sm">
-                          <i class="bi bi-pencil-fill"></i>
-                      </a>
-                         
-                      </td>
-                      </tr>
-                      {% endfor %}
-                  {% else %}
-                      <td>Sem itens associados.</td>
-                  {% endif %}
-                       
+                        {% if financeiro %}
+                          {% for financeiro in financeiro %}
+                            <tr>
+                              <td>{{ financeiro.id }}</td>
+                              <td>{{ financeiro.descricao }}</td>
+                              <td>{{ financeiro.valor }} R$</td>
+                              <td>{{ financeiro.parcelas }}</td>
+                              <td>{{ financeiro.tipo }}</td>
+                              <td>{{ financeiro.paciente }}</td>
+                              <td>{{ financeiro.data_de_cobranca }}</td>
+                              <td>
+                                <form action="{% url 'atualizar_status' financeiro.id %}" method="post">
+                                  {% csrf_token %}
+                                  <select name="status" onchange="this.form.submit()">
+                                    <option value="Pendente" {% if financeiro.status == 'Pendente' %} selected {% endif %}>
+                                      Pendente
+                                    </option>
+                                    <option value="Pago" {% if financeiro.status == 'Pago' %} selected {% endif %}>Pago</option>
+                                  </select>
+                                </form>
+                              </td>
+                              <td>
+                                <a href="{% url 'deletar_financeiro' financeiro.id %}" class="btn btn-danger btn-sm">
+                                  <i class="bi bi-trash-fill"></i>
+                                </a>
+                                <a href="{% url 'editar_financeiro' financeiro.id %}" class="btn btn-warning btn-sm">
+                                  <i class="bi bi-pencil-fill"></i>
+                                </a>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        {% else %}
+                          <tr><td colspan="9">Sem itens associados.</td></tr>
+                        {% endif %}
                       </tbody>
                     </table>
-      
                   </div>
                 </div>
+              </div>
               </div>
           <!-- Formulário de Adição de Transações -->
           <div class="col-lg-4">
