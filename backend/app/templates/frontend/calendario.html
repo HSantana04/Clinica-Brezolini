@@ -41,168 +41,169 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.5/locales/pt-br.js'></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-          var calendarEl = document.getElementById('calendar');
-          var today = new Date();
-          var calendar = new FullCalendar.Calendar(calendarEl, {
-              headerToolbar: {
-                  left: 'prev,next today',
-                  center: 'title',
-                  right: 'dayGridMonth,timeGridWeek,timeGridDay,list',
-                  locale: 'pt-br'
+        var calendarEl = document.getElementById('calendar');
+        var today = new Date();
+    
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,list'
+          },
+          locale: 'pt-br',
+          initialDate: today,
+          navLinks: true,  // Permite clicar em dias e semanas para navegar
+          selectable: true,  // Permite selecionar datas
+          selectMirror: true,
+          editable: true,  // Eventos podem ser movidos
+          dayMaxEvents: true,  // Mostra "+N" para eventos adicionais
+          events: {{ events|safe }},  // Eventos carregados do backend
+    
+          // Seleção de data (tanto em desktop quanto mobile)
+          select: function(arg) {
+            console.log('Select event:', arg);
+    
+            var modal = new bootstrap.Modal(document.getElementById('eventModal'));
+            if (modal) {
+              document.getElementById('id_start_time').value = converterDataParaDjangoFormat(arg.start);
+              document.getElementById('id_end_time').value = converterDataParaDjangoFormat(arg.end);
+              calendar.unselect();
+              modal.show();
+            } else {
+              console.error('Event modal not found');
+            }
+          },
+    
+          // Clique em evento existente
+          eventClick: function(arg) {
+            console.log('Event clicked:', arg);
+    
+            var title = arg.event.title;
+            var start = formatDateTime(arg.event.start);
+            var end = formatDateTime(arg.event.end);
+            var description = arg.event.extendedProps.description || '';
+            var id = arg.event.id;
+    
+            var modal = new bootstrap.Modal(document.getElementById('detailModal'));
+            if (modal) {
+              document.getElementById('title_event_detail').textContent = title;
+              document.getElementById('start_event_detail').textContent = start;
+              document.getElementById('end_event_detail').textContent = end;
+              document.getElementById('description_event_detail').textContent = description;
+    
+              // Atribuir IDs aos botões de ação
+              var deleteButton = document.getElementById('delete-event-button');
+              var nextWeek = document.getElementById('add-to-next-week');
+              var nextDay = document.getElementById('add-to-next-day');
+    
+              if (deleteButton) deleteButton.setAttribute('data-event-id', id);
+              if (nextWeek) nextWeek.setAttribute('data-event-id-week', id);
+              if (nextDay) nextDay.setAttribute('data-event-id-day', id);
+    
+              modal.show();
+            } else {
+              console.error('Detail modal not found');
+            }
+          }
+        });
+    
+        calendar.render();
+    
+        // Fechar modais ao clicar nos botões de fechar
+        ['modalClose1', 'modalClose2', 'modalDetailClose'].forEach(function(id) {
+          var btn = document.getElementById(id);
+          if (btn) {
+            btn.addEventListener('click', function() {
+              var modal = bootstrap.Modal.getInstance(document.getElementById(btn.closest('.modal').id));
+              if (modal) modal.hide();
+            });
+          }
+        });
+    
+        // Função auxiliar para formatar data/hora
+        function formatDateTime(dateTime) {
+          const options = {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short'
+          };
+          return new Date(dateTime).toLocaleDateString('pt-BR', options);
+        }
+    
+        // Converte a data para o formato ISO (compatível com Django)
+        function converterDataParaDjangoFormat(date) {
+          return new Date(date).toISOString();
+        }
+    
+        // Função para detectar toques em dispositivos móveis
+        function isMobileDevice() {
+          return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        }
+    
+        // Botão de exclusão de evento
+        document.getElementById('delete-event-button').addEventListener('click', function() {
+          const eventId = this.getAttribute('data-event-id');
+          if (confirm('Tem certeza que quer excluir essa consulta?')) {
+            $.ajax({
+              url: `/delete_event/${eventId}/`,
+              type: 'POST',
+              data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
               },
-              locale: 'pt-br',
-              initialDate: today,
-              navLinks: true,
-              selectable: true,
-              selectMirror: true,
-              select: function(arg) {
-                  console.log('Select event');
-                  console.log(arg.start);
-                  console.log(arg.end);
-                  var modal = new bootstrap.Modal(document.getElementById('eventModal'));
-                  if (modal) {
-                      document.getElementById('id_start_time').value = converterDataParaDjangoFormat(arg.start);
-                      document.getElementById('id_end_time').value = converterDataParaDjangoFormat(arg.end);
-                      calendar.unselect();
-                      modal.show();
-                  } else {
-                      console.error('Event modal not found');
-                  }
+              success: function(response) {
+                alert(response.message);
+                window.location.reload();
               },
-              eventClick: function(arg) {
-                  console.log('Event clicked');
-                  var title = arg.event.title;
-                  var start = formatDateTime(arg.event.start);
-                  var end = formatDateTime(arg.event.end);
-                  var description = arg.event.extendedProps.description || '';
-                  var id = arg.event.id;
-      
-                  var modal = new bootstrap.Modal(document.getElementById('detailModal'));
-                  if (modal) {
-                      document.getElementById('title_event_detail').textContent = title;
-                      document.getElementById('start_event_detail').textContent = start;
-                      document.getElementById('end_event_detail').textContent = end;
-                      document.getElementById('description_event_detail').textContent = description;
-      
-                      var deleteButton = document.getElementById('delete-event-button');
-                      var nextWeek = document.getElementById('add-to-next-week');
-                      var nextDay = document.getElementById('add-to-next-day');
-      
-                      if (deleteButton) deleteButton.setAttribute('data-event-id', id);
-                      if (nextWeek) nextWeek.setAttribute('data-event-id-week', id);
-                      if (nextDay) nextDay.setAttribute('data-event-id-day', id);
-      
-                      modal.show();
-                  } else {
-                      console.error('Detail modal not found');
-                  }
+              error: function(xhr, status, error) {
+                alert('Erro ao excluir o evento!');
+              }
+            });
+          }
+        });
+    
+        // Botão para reagendar evento para a próxima semana
+        document.getElementById('add-to-next-week').addEventListener('click', function() {
+          const eventId = this.getAttribute('data-event-id-week');
+          if (confirm('Quer reagendar para a próxima semana?')) {
+            $.ajax({
+              url: `/next_week/${eventId}/`,
+              type: 'POST',
+              data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
               },
-              editable: true,
-              dayMaxEvents: true,
-              events: {{ events|safe }},
-          });
-      
-          calendar.render();
-      
-          // Manipuladores de eventos para fechar os modais
-          const closeBtn1 = document.getElementById('modalClose1');
-          const closeBtn2 = document.getElementById('modalClose2');
-          const closeBtn3 = document.getElementById('modalDetailClose');
-      
-          if (closeBtn1) {
-              closeBtn1.addEventListener('click', () => {
-                  var modal = bootstrap.Modal.getInstance(document.getElementById('eventModal'));
-                  if (modal) modal.hide();
-              });
-          }
-      
-          if (closeBtn2) {
-              closeBtn2.addEventListener('click', () => {
-                  var modal = bootstrap.Modal.getInstance(document.getElementById('eventModal'));
-                  if (modal) modal.hide();
-              });
-          }
-      
-          if (closeBtn3) {
-              closeBtn3.addEventListener('click', () => {
-                  var modal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
-                  if (modal) modal.hide();
-              });
-          }
-      
-          // Funções auxiliares
-          function formatDateTime(dateTime) {
-              const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
-              return new Date(dateTime).toLocaleDateString('pt-BR', options);
-          }
-      
-          function converterDataParaDjangoFormat(date) {
-              // Adapte esta função conforme necessário
-              return new Date(date).toISOString(); 
-          }
-      
-          // Funções de manipulação de eventos
-          document.getElementById('delete-event-button').addEventListener('click', function() {
-              const eventId = this.getAttribute('data-event-id');
-              if (confirm('Tem certeza que quer excluir essa consulta?')) {
-                  $.ajax({
-                      url: `/delete_event/${eventId}/`,
-                      type: 'POST',
-                      data: {
-                          csrfmiddlewaretoken: '{{ csrf_token }}',
-                      },
-                      success: function(response) {
-                          alert(response.message);
-                          window.location.reload();
-                      },
-                      error: function(xhr, status, error) {
-                          alert('Error!');
-                      }
-                  });
+              success: function(response) {
+                alert(response.message);
+                window.location.reload();
+              },
+              error: function(xhr, status, error) {
+                alert('Erro ao reagendar!');
               }
-          });
-      
-          document.getElementById('add-to-next-week').addEventListener('click', function() {
-              const eventId = this.getAttribute('data-event-id-week');
-              if (confirm('Quer reagendar para a proxima semana?')) {
-                  $.ajax({
-                      url: `/next_week/${eventId}/`,
-                      type: 'POST',
-                      data: {
-                          csrfmiddlewaretoken: '{{ csrf_token }}',
-                      },
-                      success: function(response) {
-                          alert(response.message);
-                          window.location.reload();
-                      },
-                      error: function(xhr, status, error) {
-                          alert('Error!');
-                      }
-                  });
+            });
+          }
+        });
+    
+        // Botão para reagendar evento para o próximo dia
+        document.getElementById('add-to-next-day').addEventListener('click', function() {
+          const eventId = this.getAttribute('data-event-id-day');
+          if (confirm('Quer reagendar para o próximo dia?')) {
+            $.ajax({
+              url: `/next_day/${eventId}/`,
+              type: 'POST',
+              data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+              },
+              success: function(response) {
+                alert(response.message);
+                window.location.reload();
+              },
+              error: function(xhr, status, error) {
+                alert('Erro ao reagendar!');
               }
-          });
-      
-          document.getElementById('add-to-next-day').addEventListener('click', function() {
-              const eventId = this.getAttribute('data-event-id-day');
-              if (confirm('Are you sure you want to add this event to next day?')) {
-                  $.ajax({
-                      url: `/next_day/${eventId}/`,
-                      type: 'POST',
-                      data: {
-                          csrfmiddlewaretoken: '{{ csrf_token }}',
-                      },
-                      success: function(response) {
-                          alert(response.message);
-                          window.location.reload();
-                      },
-                      error: function(xhr, status, error) {
-                          alert('Error!');
-                      }
-                  });
-              }
-          });
+            });
+          }
+        });
       });
-      </script>
+    </script>
+    
       
       <!-- =======================================================
       * Template Name: NiceAdmin
