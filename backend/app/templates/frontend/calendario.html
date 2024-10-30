@@ -327,7 +327,18 @@
       </aside><!-- End Sidebar-->
     
       <main id="main" class="main">
-    
+        
+        <form method="GET" action="{% url 'calendario' %}">
+          <select id="adminUserSelect" name="user" onchange="this.form.submit()">
+              <option value="">Todos dentistas</option>
+              {% for user in admin_users %}
+                  <option value="{{ user.id }}" 
+                      {% if selected_user and selected_user.id == user.id %}selected{% endif %}>
+                      {{ user.username }}
+                  </option>
+              {% endfor %}
+          </select>
+      </form>
         <div class="row">
           <div class="col-md-12">
               <div class="tile row">
@@ -341,6 +352,7 @@
                               <p>ID: {{ event.id }}</p>
                               <p>Das: {{ event.start_time|date:"d/m/Y H:i" }}</p>
                               <p>Até: {{ event.end_time|date:"d/m/Y H:i" }}</p>
+                              <p>Dentista: {{ event.user }}</p>
                           </div>
                       {% empty %}
                           <p>Não há consultas agendadas</p>
@@ -352,15 +364,15 @@
                   </div>
       
                   <div class="modal fade show" id="eventModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered" role="document">
-                          <div class="modal-content">
-                              <div class="modal-header bg-primary">
-                                  <h5 class="modal-title text-white" id="exampleModalLongTitle">Agendar consulta</h5>
-                                  <button id="modalClose1" type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                      <span aria-hidden="true">&times;</span>
-                                  </button>
-                              </div>
-                              <form method="post">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary">
+                                <h5 class="modal-title text-white" id="exampleModalLongTitle">Agendar consulta</h5>
+                                <button id="modalClose1" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form method="post">
                                 {% csrf_token %}
                                 <div class="modal-body">
                                     <div class="form-group">
@@ -380,11 +392,22 @@
                                         {{ form.end_time }}
                                     </div>
                                     <div class="form-group">
-                                        <label for="paciente" class="col-form-label">Paciente:</label>
+                                        <label for="message-text" class="col-form-label">Paciente:</label>
                                         <select class="form-select" name="paciente" aria-label="Default select example">
                                             <option value="" selected>Selecione um paciente</option>
                                             {% for paciente in pacientes %}
                                                 <option value="{{ paciente.id }}">{{ paciente.Nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="message-text" class="col-form-label">Usuário:</label>
+                                        <select class="form-select" name="user" aria-label="Default select example">
+                                            <option value="" {% if not selected_user %}selected{% endif %}>Selecione o dentista</option>
+                                            {% for user in admin_users %}
+                                                <option value="{{ user.id }}" {% if selected_user and selected_user.id == user.id %}selected{% endif %}>
+                                                    {{ user.username }}
+                                                </option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -394,9 +417,9 @@
                                     <button type="submit" class="btn btn-primary">Salvar</button>
                                 </div>
                             </form>
-                          </div>
-                      </div>
-                  </div>
+                        </div>
+                    </div>
+                </div>
                   <div class="modal fade show" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
@@ -470,6 +493,7 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
         <script src="{% static 'calender/main.js' %}"></script>
+        
 
     </body>
     

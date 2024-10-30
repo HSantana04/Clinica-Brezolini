@@ -96,7 +96,7 @@ class Event(EventAbstract):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name="events", blank=True, null=True)
 
     objects = EventManager()
-
+    
     def __str__(self):
         return self.title
 

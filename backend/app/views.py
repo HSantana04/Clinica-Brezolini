@@ -545,7 +545,7 @@ def delete_user(request, user_id):
 
 @login_required(login_url="/")
 def calendario(request):
-    events = Event.objects.all()
+    events = Event.objects.filter(user=request.user)
     pacientes = Paciente.objects.all()
     users = User.objects.all()
     return render(request, 'frontend/calendario.html', {
@@ -554,46 +554,7 @@ def calendario(request):
         'users': users,
     })
 
-@login_required(login_url="/")
-class CalendarViewNew(LoginRequiredMixin, generic.View):
-    template_name = "frontend/calendario.html"
-    form_class = EventForm
 
-    def get(self, request, *args, **kwargs):
-        forms = self.form_class()
-        
-        # Todos os eventos do usuário
-        events = Event.objects.get_all_events(user=request.user)
-        
-        # Eventos futuros e do mês atual
-        current_date = now()
-        events_month = Event.objects.filter(
-            user=request.user,
-            start_time__year=current_date.year,
-            start_time__month=current_date.month,
-            start_time__gte=current_date
-        ).order_by('start_time')
-
-        # Lista de eventos formatada para uso em um calendário ou exibição JSON-like
-        event_list = [
-            {
-                "id": event.id,
-                "title": event.title,
-                "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                "description": event.description,
-            }
-            for event in events
-        ]
-
-        pacientes = Paciente.objects.all()
-        context = {
-            "form": forms,
-            "events": event_list,
-            "events_month": events_month,
-            "pacientes": pacientes,
-        }
-        return render(request, self.template_name, context)
 
 @login_required(login_url="/")
 def get_date(req_day):
@@ -690,25 +651,43 @@ class EventMemberDeleteView(generic.DeleteView):
     success_url = reverse_lazy("calendario")
 
 class CalendarViewNew(LoginRequiredMixin, generic.View):
-    login_url = "accounts:signin"
     template_name = "frontend/calendario.html"
     form_class = EventForm
 
     def get(self, request, *args, **kwargs):
         forms = self.form_class()
 
-        # Todos os eventos
-        events = Event.objects.all()
+        # Verifica se o usuário faz parte do grupo "Recepcionista"
+        is_recepcionista = request.user.groups.filter(name="recepcionista").exists()
 
-        # Eventos futuros do mês atual
+        # Obtém todos os usuários do grupo "administrador"
+        admin_users = User.objects.filter(groups__name="administrador")
+        pacientes = Paciente.objects.all()
+
+        # Pega o usuário selecionado do parâmetro GET (se houver)
+        selected_user_id = request.GET.get('user')
+        selected_user = None
+
+        if selected_user_id:
+            # Se um usuário específico foi selecionado, filtra por esse usuário
+            selected_user = User.objects.filter(id=selected_user_id).first()
+            events = Event.objects.filter(user=selected_user) if selected_user else Event.objects.none()
+        elif is_recepcionista or not selected_user_id:
+            # Se "Todos dentistas" foi selecionado ou se é recepcionista, mostra todos os eventos
+            events = Event.objects.all()
+        else:
+            # Caso contrário, mostra apenas os eventos do usuário autenticado
+            events = Event.objects.filter(user=request.user)
+
+        # Eventos do mês atual e futuros
         current_date = now()
-        events_month = Event.objects.filter(
+        events_month = events.filter(
             start_time__year=current_date.year,
             start_time__month=current_date.month,
             start_time__gte=current_date
         ).order_by('start_time')
 
-        # Preparação da lista de eventos para uso no calendário
+        # Formatar os eventos para exibição no calendário
         event_list = [
             {
                 "id": event.id,
@@ -716,33 +695,20 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
                 "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                 "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
                 "description": event.description,
+                "user": event.user.username,
             }
             for event in events
         ]
 
-        pacientes = Paciente.objects.all()
-
-        # Contexto para o template
         context = {
             "form": forms,
             "events": event_list,
             "events_month": events_month,
+            "admin_users": admin_users,
+            "selected_user": selected_user,
             "pacientes": pacientes,
         }
-
         return render(request, self.template_name, context)
-    
-    def post(self, request, *args, **kwargs):
-        forms = self.form_class(request.POST)
-        if forms.is_valid():
-            form = forms.save(commit=False)
-            form.user = request.user
-            form.save()
-            return redirect("calendario")
-        context = {"form": forms}
-        return render(request, self.template_name, context)
-
-
 @login_required(login_url="/")
 def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
