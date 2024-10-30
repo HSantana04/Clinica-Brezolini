@@ -655,39 +655,49 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
     form_class = EventForm
 
     def get(self, request, *args, **kwargs):
-        forms = self.form_class()
+        form = self.form_class()
+        return self._render_calendar(request, form)
 
-        # Verifica se o usuário faz parte do grupo "Recepcionista"
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+
+            # Pega o ID do usuário selecionado no formulário
+            selected_user_id = request.POST.get('user')  # Obtém o ID do usuário selecionado
+            selected_user = User.objects.filter(id=selected_user_id).first()
+
+            if selected_user:
+                event.user = selected_user  # Define o usuário selecionado como o responsável pelo evento
+                event.save()
+                return redirect('calendario')  # Redireciona para a página do calendário após salvar
+
+        return self._render_calendar(request, form)
+
+    def _render_calendar(self, request, form):
+        # Lógica para verificar grupos e obter eventos
         is_recepcionista = request.user.groups.filter(name="recepcionista").exists()
-
-        # Obtém todos os usuários do grupo "administrador"
         admin_users = User.objects.filter(groups__name="administrador")
         pacientes = Paciente.objects.all()
 
-        # Pega o usuário selecionado do parâmetro GET (se houver)
         selected_user_id = request.GET.get('user')
         selected_user = None
 
         if selected_user_id:
-            # Se um usuário específico foi selecionado, filtra por esse usuário
             selected_user = User.objects.filter(id=selected_user_id).first()
             events = Event.objects.filter(user=selected_user) if selected_user else Event.objects.none()
         elif is_recepcionista or not selected_user_id:
-            # Se "Todos dentistas" foi selecionado ou se é recepcionista, mostra todos os eventos
             events = Event.objects.all()
         else:
-            # Caso contrário, mostra apenas os eventos do usuário autenticado
             events = Event.objects.filter(user=request.user)
 
-        # Eventos do mês atual e futuros
-        current_date = now()
+        current_date = timezone.now()
         events_month = events.filter(
             start_time__year=current_date.year,
             start_time__month=current_date.month,
             start_time__gte=current_date
         ).order_by('start_time')
 
-        # Formatar os eventos para exibição no calendário
         event_list = [
             {
                 "id": event.id,
@@ -701,7 +711,7 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
         ]
 
         context = {
-            "form": forms,
+            "form": form,
             "events": event_list,
             "events_month": events_month,
             "admin_users": admin_users,
