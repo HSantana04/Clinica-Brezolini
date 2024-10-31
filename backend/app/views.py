@@ -111,7 +111,7 @@ def financeiro(request):
     if request.method == "POST":
         # Obtém dados do formulário
         descricao = request.POST.get('descricao')
-        valor = request.POST.get('valor')
+        valor = float(request.POST.get('valor'))
         tipo = request.POST.get('tipo')
        
         data_de_cobranca = request.POST.get('data_de_cobranca')
@@ -788,4 +788,3 @@ def editar_paciente(request, paciente_id):
         form = PacienteForm(instance=paciente)
 
     return render(request, 'frontend/editar_paciente.html', {'form': form})
-

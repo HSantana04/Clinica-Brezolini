@@ -177,7 +177,7 @@
                           <th scope="col">#</th>
                           <th scope="col">Descrição</th>
                           <th scope="col">Valor</th>
-                          <th scope="col">Parcelas</th>
+                          <th scope="col">Numero da Parcela</th>
                           <th scope="col">Tipo</th>
                           <th scope="col">Paciente</th>
                           <th scope="col">Data de Cobrança</th>
@@ -192,7 +192,7 @@
                               <td>{{ financeiro.id }}</td>
                               <td>{{ financeiro.descricao }}</td>
                               <td>{{ financeiro.valor }} R$</td>
-                              <td>{{ financeiro.parcelas }}</td>
+                              <td>{{ financeiro.numero_parcela }}</td>
                               <td>{{ financeiro.tipo }}</td>
                               <td>{{ financeiro.paciente }}</td>
                               <td>{{ financeiro.data_de_cobranca }}</td>
@@ -250,49 +250,49 @@
 
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title">Adicionar Transação</h5>
-              
-                  <form method="POST" id="transactionForm">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                      <label for="description" class="form-label">Descrição</label>
-                      <input type="text" class="form-control" id="description" name="descricao" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="value" class="form-label">Valor</label>
-                      <input type="number" class="form-control" id="value" name="valor" step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="paciente" class="col-form-label">Paciente:</label>
-                      <select class="form-select" name="paciente" aria-label="Default select example">
-                        <option value="" selected>Selecione um paciente</option>
-                        {% for paciente in pacientes %}
-                          <option value="{{ paciente.id }}">{{ paciente.Nome }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                    <div class="mb-3">
-                      <label for="type" class="form-label">Tipo</label>
-                      <select class="form-select" id="type" name="tipo" required>
-                        <option value="Entrada">Entrada</option>
-                        <option value="Saída">Saída</option>
-                      </select>
-                    </div>
-                    <div class="row mb-3">
-                      <label for="inputDate" class="form-label">Data de Cobrança (Primeira Parcela):</label>
-                      <div>
-                        <input type="date" name="data_de_cobranca" class="form-control">
-                      </div>
-                    </div>
-                    <div class="mb-3">
-                      <label for="parcelas" class="form-label">Número de Parcelas</label>
-                      <input type="number" class="form-control" id="parcelas" name="parcelas" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Adicionar</button>
-                  </form>
+                    <h5 class="card-title">Adicionar Transação</h5>
+            
+                    <form method="POST" id="transactionForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="description" name="descricao" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="value" class="form-label">Valor</label>
+                            <input type="number" class="form-control" id="value" name="valor" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paciente" class="col-form-label">Paciente:</label>
+                            <select class="form-select" name="paciente" aria-label="Default select example" required>
+                                <option value="" disabled selected>Selecione um paciente</option>
+                                {% for paciente in pacientes %}
+                                    <option value="{{ paciente.id }}">{{ paciente.Nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Tipo</label>
+                            <select class="form-select" id="type" name="tipo" required>
+                                <option value="Entrada">Entrada</option>
+                                <option value="Saída">Saída</option>
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="inputDate" class="form-label">Data de Cobrança (Primeira Parcela):</label>
+                            <div>
+                                <input type="date" name="data_de_cobranca" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="parcelas" class="form-label">Número de Parcelas</label>
+                            <input type="number" class="form-control" id="parcelas" name="parcelas" min="1" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
                 </div>
-              </div>
-  
+            </div>
+            
           <!-- Tabela de Listagem de Transações -->
           
   

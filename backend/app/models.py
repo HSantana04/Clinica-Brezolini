@@ -155,12 +155,11 @@ class Financeiro(models.Model):
     tipo=models.CharField(max_length=8)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     data_de_cobranca=models.DateField(default=timezone.now)
-    parcelas = models.PositiveIntegerField()
+    parcelas = models.IntegerField(null=True, blank=True)
     numero_parcela = models.PositiveIntegerField()
     status=models.CharField(max_length=20, default='Pendente')
     codigo_receita = models.CharField(max_length=4, default='1708')  # Exemplo: IRPJ
-    periodo_apuracao = models.DateField()
-    data_vencimento = models.DateField()
+    
     def __str__(self):
         return f"{self.descricao}"
 
